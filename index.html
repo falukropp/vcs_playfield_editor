@@ -53,91 +53,24 @@
     </style>
     <script type="module">
       import { Playfield, PlayfieldMode } from "./playfield.js";
+      import { Editor } from "./editor.js";
 
-      const canvasWidth = 1280;
-      const canvasHeight = 960;
       const vcsRows = 192;
       const scanLinesPerVcsRow = 12; // Should be maybe modifiable
       const vcsPlayfieldRows = vcsRows / scanLinesPerVcsRow;
       const vcsPlayfieldColumns = 40;
 
-      const canvasRowsPerPVcsPixel = canvasHeight / vcsPlayfieldRows;
-      const canvasColumnsPerVcsPixel = canvasWidth / vcsPlayfieldColumns;
-
-      const playfield = new Playfield(vcsPlayfieldRows, vcsPlayfieldColumns);
-
-      playfield.setPixel(1, 1, 1);
-      playfield.setPixel(4, 0, 1);
-      playfield.setPixel(0, 6, 1);
-
-      const updateCanvas = (canvas, playfield) => {
-        const data = playfield.data;
-        const context = canvas.getContext("2d");
-
-        context.clearRect(0, 0, canvasWidth, canvasHeight);
-        context.fillStyle = "orange";
-
-        for (let row = 0; row < vcsPlayfieldRows; ++row) {
-          for (let col = 0; col < vcsPlayfieldColumns; ++col) {
-            if (data[row][col]) {
-              context.fillRect(col * canvasColumnsPerVcsPixel, row * canvasRowsPerPVcsPixel, canvasColumnsPerVcsPixel, canvasRowsPerPVcsPixel);
-            }
-          }
-        }
-      };
-
-      const getPlayfieldCoordinatesFromMousePosition = (element, mouseX, mouseY) => {
-        const boundingBox = element.getBoundingClientRect();
-        const canvasX = ((mouseX - boundingBox.left) * element.width) / boundingBox.width;
-        const canvasY = ((mouseY - boundingBox.top) * element.height) / boundingBox.height;
-        return { playFieldX: Math.floor(canvasX / canvasColumnsPerVcsPixel), playFieldY: Math.floor(canvasY / canvasRowsPerPVcsPixel) };
-      };
-
-      const drawVcsPixel = (canvas, playfield, x, y, value) => {
-        if (playfield.swapPixel(x, y, value) !== value) {
-          updateCanvas(canvas, playfield);
-        }
-      };
-
-      const setEditorMode = (mode) => {
-        playfield.mode = mode;
-        updateCanvas(document.getElementById("playfield"), playfield);
-      };
-
-      const mouseDownHandler = (e) => {
-        event.preventDefault();
-        const canvas = e.target;
-        const color = e.button === 0 ? 1 : 0;
-        const { playFieldX, playFieldY } = getPlayfieldCoordinatesFromMousePosition(canvas, e.pageX, e.pageY);
-        drawVcsPixel(canvas, playfield, playFieldX, playFieldY, color);
-
-        document.addEventListener("mousemove", mouseMoveHandler);
-        document.addEventListener("mouseup", mouseUpHandler);
-      };
-
-      const mouseMoveHandler = (e) => {
-        event.preventDefault();
-        const canvas = document.getElementById("playfield");
-        const color = e.buttons & 2 ? 0 : 1;
-        const { playFieldX, playFieldY } = getPlayfieldCoordinatesFromMousePosition(canvas, e.pageX, e.pageY);
-        drawVcsPixel(canvas, playfield, playFieldX, playFieldY, color);
-      };
-
-      const mouseUpHandler = function (e) {
-        document.removeEventListener("mousemove", mouseMoveHandler);
-        document.removeEventListener("mouseup", mouseUpHandler);
-      };
-
       document.addEventListener("DOMContentLoaded", function () {
+        const playfield = new Playfield(vcsPlayfieldRows, vcsPlayfieldColumns);
+
         const canvas = document.getElementById("playfield");
         canvas.oncontextmenu = () => false;
+        const editor = new Editor(document, canvas, playfield);
 
-        canvas.addEventListener("mousedown", mouseDownHandler);
+        document.getElementById("playfieldNormalMode").addEventListener("click", () => editor.setEditorMode(PlayfieldMode.NORMAL));
+        document.getElementById("playfieldMirrorMode").addEventListener("click", () => editor.setEditorMode(PlayfieldMode.REFLECTED));
 
-        document.getElementById("playfieldNormalMode").addEventListener("click", () => setEditorMode(PlayfieldMode.NORMAL));
-        document.getElementById("playfieldMirrorMode").addEventListener("click", () => setEditorMode(PlayfieldMode.REFLECTED));
-
-        updateCanvas(canvas, playfield);
+        editor.updateCanvas();
       });
     </script>
   </head>
