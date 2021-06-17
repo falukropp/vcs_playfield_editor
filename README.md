@@ -3,8 +3,11 @@ python3 -m http.server --bind 0.0.0.0 9999
 # TODO:
 - Layout
     - palette (of rooms)
+- Playfield
+    - listener / push/pub changes to both vcs_data and canvas
 - Editor
     - Select drawable/fixed clear/fixed filled pf0,pf1,pf2
+    - Undo/Redo
     - Draw lines
     - Draw boxes
     - Draw circle
