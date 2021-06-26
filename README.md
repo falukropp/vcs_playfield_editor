@@ -1,4 +1,4 @@
-python3 -m http.server --bind 0.0.0.0 9999
+python -m http.server --bind 0.0.0.0 9999
 
 # TODO:
 - Layout

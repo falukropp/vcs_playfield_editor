@@ -1,111 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <style>
-      body {
-        margin: 0px;
-      }
-      canvas {
-        background-color: white;
-        max-width: 100%;
-        max-height: 100%;
-      }
 
-      #vcs_data {
-        max-width: 100%;
-        max-height: 100%;
-        resize: none;
-        font-size: small;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VCS Editor</title>
+  <style>
+    body {
+      margin: 0px;
+    }
 
-      .grid-container {
-        height: 100vh;
-        width: 100vw;
-        display: grid;
-        grid-template-columns: 0.5fr 0.1fr 1.4fr;
-        grid-template-rows: 0.2r 1.8fr;
-        gap: 0px 0px;
-        grid-template-areas:
-          "Data Map Commands"
-          "Data Map Editor";
-      }
+    canvas {
+      background-color: white;
+      max-width: 100%;
+      max-height: 100%;
+    }
 
-      .Editor {
-        grid-area: Editor;
-        background-color: burlywood;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: auto;
-      }
+    #vcs_data {
+      max-width: 100%;
+      max-height: 100%;
+      resize: none;
+      font-size: small;
+    }
 
-      .Commands {
-        grid-area: Commands;
-        background-color: aqua;
-      }
+    .grid-container {
+      height: 100vh;
+      width: 100vw;
+      display: grid;
+      grid-template-columns: 0.5fr 0.1fr 1.4fr;
+      grid-template-rows: 0.2r 1.8fr;
+      gap: 0px 0px;
+      grid-template-areas:
+        "Data Map Commands"
+        "Data Map Editor";
+    }
 
-      .Data {
-        grid-area: Data;
-        background-color: aquamarine;
-      }
+    .Editor {
+      grid-area: Editor;
+      background-color: burlywood;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+    }
 
-      .Map {
-        grid-area: Map;
-        background-color: chocolate;
-      }
-    </style>
-    <script type="module">
-      import { Playfield, PlayfieldMode } from "./playfield.js";
-      import { Editor } from "./editor.js";
-      import { VCSData } from "./vcs_data.js";
+    .Commands {
+      grid-area: Commands;
+      background-color: aqua;
+    }
 
-      const vcsRows = 192;
-      const scanLinesPerVcsRow = 12; // Should be maybe modifiable
-      const vcsPlayfieldRows = vcsRows / scanLinesPerVcsRow;
-      const vcsPlayfieldColumns = 40;
+    .Data {
+      grid-area: Data;
+      background-color: aquamarine;
+    }
 
-      document.addEventListener("DOMContentLoaded", function () {
-        const playfield = new Playfield(vcsPlayfieldRows, vcsPlayfieldColumns);
+    .Map {
+      grid-area: Map;
+      background-color: chocolate;
+    }
+  </style>
+  <script type="module">
+    import { Playfield, PlayfieldMode } from "./playfield.js";
+    import { Editor } from "./editor.js";
+    import { VCSData } from "./vcs_data.js";
 
-        const canvas = document.getElementById("playfield");
-        canvas.oncontextmenu = () => false;
-        const editor = new Editor(document, canvas, playfield);
+    const vcsRows = 192;
+    const scanLinesPerVcsRow = 12; // Should be maybe modifiable
+    const vcsPlayfieldRows = vcsRows / scanLinesPerVcsRow;
 
-        const vcsData = new VCSData(document.getElementById("vcs_data"), playfield)
+    document.addEventListener("DOMContentLoaded", function () {
+      const playfield = new Playfield(vcsPlayfieldRows);
 
-        document.getElementById("playfieldNormalMode").addEventListener("click", () => editor.setEditorMode(PlayfieldMode.NORMAL));
-        document.getElementById("playfieldMirrorMode").addEventListener("click", () => editor.setEditorMode(PlayfieldMode.REFLECTED));
+      const canvas = document.getElementById("playfield");
+      canvas.oncontextmenu = () => false;
+      const editor = new Editor(document, canvas, playfield);
 
-        document.getElementById("updateData").addEventListener("click", () => vcsData.updateFromPlayfield());
+      const vcsData = new VCSData(document.getElementById("vcs_data"), playfield)
 
-        editor.updateCanvas();
-      });
-    </script>
-  </head>
-  <body>
-    <div class="grid-container">
-      <div class="Editor">
-        <!--
+      document.getElementById("playfieldNormalMode").addEventListener("click", () => editor.setEditorMode(PlayfieldMode.NORMAL));
+      document.getElementById("playfieldMirrorMode").addEventListener("click", () => editor.setEditorMode(PlayfieldMode.REFLECTED));
+
+      document.getElementById("edit_mode_pf0").addEventListener("change", (e) => editor.setRegisterMode(0, e.target.value));
+      document.getElementById("edit_mode_pf1").addEventListener("change", (e) => editor.setRegisterMode(1, e.target.value));
+      document.getElementById("edit_mode_pf2").addEventListener("change", (e) => editor.setRegisterMode(2, e.target.value));
+
+
+      document.getElementById("updateData").addEventListener("click", () => vcsData.updateFromPlayfield());
+
+      editor.updateCanvas();
+    });
+  </script>
+</head>
+
+<body>
+  <div class="grid-container">
+    <div class="Editor">
+      <!--
           Each vcs_pixel is scanlines per pixels * 5 pixel high, and 32 pixels wide
            960px;  /* 192 * 5  (5 so that height * 4/3 is divible by 40)*/
           1280px;  /*  960 * 4/3 */
         -->
-        <canvas id="playfield" width="1280" height="960"> Your browser does not support HTML5 Canvas. </canvas>
-      </div>
-      <div class="Commands">
-        <h1>Simple VCS Playfield editor</h1>
+      <canvas id="playfield" width="1280" height="960"> Your browser does not support HTML5 Canvas. </canvas>
+    </div>
+    <div class="Commands">
+      <h1>Simple VCS Playfield editor</h1>
+      <div class="toolbar">
         <button id="playfieldNormalMode">Normal</button>
         <button id="playfieldMirrorMode">Mirror</button>
+        <label>PF0
+          <select id="edit_mode_pf0">
+            <option selected value="DRAW">draw</option>
+            <option value="FILL">fill</option>
+            <option value="CLEAR">clear</option>
+          </select>
+        </label>
+        <label>PF1
+          <select id="edit_mode_pf1">
+            <option selected value="DRAW">draw</option>
+            <option value="FILL">fill</option>
+            <option value="CLEAR">clear</option>
+          </select>
+        </label>
+        <label>PF2
+          <select id="edit_mode_pf2">
+            <option selected value="DRAW">draw</option>
+            <option value="FILL">fill</option>
+            <option value="CLEAR">clear</option>
+          </select>
+        </label>
       </div>
-      <div class="Data">
-        <button id="updateData">Update data</button>
-        <textarea id="vcs_data" readonly cols="40" rows="50">blah! blah! blah! blah! blah! blah! blah! blah!</textarea>
-      </div>
-      <div class="Map"></div>
     </div>
-  </body>
+    <div class="Data">
+      <div class="toolbar">
+        <button id="updateData">Update data</button>
+        <div>
+          <textarea id="vcs_data" readonly cols="40"
+            rows="50">blah! blah! blah! blah! blah! blah! blah! blah!</textarea>
+        </div>
+        <div class="Map"></div>
+      </div>
+</body>
+
 </html>

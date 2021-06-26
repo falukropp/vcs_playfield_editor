@@ -18,7 +18,7 @@ export class VCSData {
         // Both NORMAL and REFLECTED only use half the width.
         // PFO |PF1     |PF2
         // 4567|76543210|01234567
-        if (value) {
+        if (value === 1) {
           if (x <= 3) {
             PF0 += 1 << (x + 4);
           } else if (x <= 11) {

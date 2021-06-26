@@ -53,6 +53,11 @@ export class Editor {
     this.updateCanvas();
   }
 
+  setRegisterMode(register, mode) {
+    this.playfield.setRegisterMode(register, mode)
+    this.updateCanvas();
+  }
+
   mouseDown(e) {
     e.preventDefault();
     this.drawPixel(e.pageX, e.pageY, e.buttons & 2 ? 0 : 1);
