@@ -80,6 +80,8 @@
 
       document.getElementById("playfieldNormalMode").addEventListener("click", () => editor.setEditorMode(PlayfieldMode.NORMAL));
       document.getElementById("playfieldMirrorMode").addEventListener("click", () => editor.setEditorMode(PlayfieldMode.REFLECTED));
+      document.getElementById("playfieldUndo").addEventListener("click", () => editor.undo());
+      document.getElementById("playfieldRedo").addEventListener("click", () => editor.redo());
 
       document.getElementById("edit_mode_pf0").addEventListener("change", (e) => editor.setRegisterMode(0, e.target.value));
       document.getElementById("edit_mode_pf1").addEventListener("change", (e) => editor.setRegisterMode(1, e.target.value));
@@ -110,6 +112,8 @@
       <div class="toolbar">
         <button id="playfieldNormalMode">Normal</button>
         <button id="playfieldMirrorMode">Mirror</button>
+        <button id="playfieldUndo">Undo</button>
+        <button id="playfieldRedo">Redo</button>
         <label>PF0
           <select id="edit_mode_pf0">
             <option selected value="DRAW">draw</option>
