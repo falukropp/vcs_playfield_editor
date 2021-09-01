@@ -58,6 +58,10 @@
                 grid-area: Map;
                 background-color: chocolate;
             }
+
+            button.selected {
+                border: 3px solid black;
+            }
         </style>
         <script type="module">
             import { Playfield, PlayfieldMode } from './playfield.js';
@@ -95,6 +99,9 @@
             });
 
             document.addEventListener('editorStateChanged', (e) => {
+                [...document.getElementsByClassName('playfieldMode')].forEach((e) => e.classList.remove('selected'));
+                document.getElementById(e.detail.playfieldMode === PlayfieldMode.NORMAL ? 'playfieldNormalMode' : 'playfieldMirrorMode').classList.add('selected');
+
                 document.getElementById('edit_mode_pf0').value = e.detail.registerModes[0];
                 document.getElementById('edit_mode_pf1').value = e.detail.registerModes[1];
                 document.getElementById('edit_mode_pf2').value = e.detail.registerModes[2];

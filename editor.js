@@ -7,6 +7,7 @@ export class Editor {
         this.document = document;
         this.canvas = canvas;
         this.playfield = playfield;
+        this.#updateGUIFromPlayfield()
         this.#undos = new WeakMap(); // <Playfield, Playfield[]>
         this.#currentUndoLevel = 0;
 
@@ -50,17 +51,21 @@ export class Editor {
         this.#undos.set(this.playfield, undosForCurrentPlayfield);
     }
 
+    #updateGUIFromPlayfield() {
+        const registerModes = this.playfield.getRegisterModes();
+        const playfieldMode = this.playfield.mode;
+        const event = new CustomEvent('editorStateChanged', { detail: { registerModes, playfieldMode } });
+        this.document.dispatchEvent(event);
+    }
+
     #setPlayfieldFromUndo() {
         const oldPlayfield = this.#undos.get(this.playfield)[this.#currentUndoLevel];
         this.playfield.height = oldPlayfield.height;
         this.playfield.mode = oldPlayfield.mode;
         this.playfield.data = oldPlayfield.data;
-        const registerModes = oldPlayfield.getRegisterModes();
-        this.playfield.setRegisterModes(registerModes);
+        this.playfield.setRegisterModes(oldPlayfield.getRegisterModes());
 
-        const event = new CustomEvent('editorStateChanged', { detail: { registerModes } });
-        this.document.dispatchEvent(event);
-
+        this.#updateGUIFromPlayfield();
         this.updateCanvas();
     }
 
@@ -104,6 +109,7 @@ export class Editor {
             this.playfield.mode = newMode;
             this.updateCanvas();
             this.#pushUndo();
+            this.#updateGUIFromPlayfield();
         }
     }
 
@@ -111,6 +117,7 @@ export class Editor {
         this.playfield.setRegisterMode(register, newMode);
         this.updateCanvas();
         this.#pushUndo();
+        this.#updateGUIFromPlayfield();
     }
 
     mouseDown(e) {
