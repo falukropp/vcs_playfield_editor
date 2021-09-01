@@ -44,9 +44,9 @@ export class Editor {
     }
 
     #pushUndo() {
-        const undosForCurrentPlayfield = this.#undos.get(this.playfield)?.slice(0, this.#currentUndoLevel+1) ?? [];
+        const undosForCurrentPlayfield = this.#undos.get(this.playfield)?.slice(0, this.#currentUndoLevel + 1) ?? [];
         undosForCurrentPlayfield.push(new Playfield(this.playfield.height, this.playfield.mode, this.playfield.data, this.playfield.getRegisterModes()));
-        this.#currentUndoLevel = undosForCurrentPlayfield.length-1;
+        this.#currentUndoLevel = undosForCurrentPlayfield.length - 1;
         this.#undos.set(this.playfield, undosForCurrentPlayfield);
     }
 
@@ -55,11 +55,13 @@ export class Editor {
         this.playfield.height = oldPlayfield.height;
         this.playfield.mode = oldPlayfield.mode;
         this.playfield.data = oldPlayfield.data;
-        this.playfield.setRegisterModes(oldPlayfield.getRegisterModes());
+        const registerModes = oldPlayfield.getRegisterModes();
+        this.playfield.setRegisterModes(registerModes);
+
+        const event = new CustomEvent('editorStateChanged', { detail: { registerModes } });
+        this.document.dispatchEvent(event);
 
         this.updateCanvas();
-
-        // TODO: Update GUI
     }
 
     undo() {
@@ -70,7 +72,7 @@ export class Editor {
     }
 
     redo() {
-        if (this.#currentUndoLevel < this.#undos.get(this.playfield)?.length-1) {
+        if (this.#currentUndoLevel < this.#undos.get(this.playfield)?.length - 1) {
             this.#currentUndoLevel++;
             this.#setPlayfieldFromUndo();
         }
