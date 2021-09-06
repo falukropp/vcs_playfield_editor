@@ -65,12 +65,21 @@
         </style>
         <script type="module">
             import { Playfield, PlayfieldMode } from './playfield.js';
-            import { Editor } from './editor.js';
+            import { DrawMode, Editor } from './editor.js';
             import { VCSData } from './vcs_data.js';
 
             const vcsRows = 192;
             const scanLinesPerVcsRow = 12; // Should be maybe modifiable
             const vcsPlayfieldRows = vcsRows / scanLinesPerVcsRow;
+
+            const idsAndModes = [
+                ['drawModeScribble', DrawMode.SCRIBBLE],
+                ['drawModeLine', DrawMode.LINE],
+                ['drawModeFilledRect', DrawMode.FILLED_RECT],
+                ['drawModeRectangle', DrawMode.RECT],
+                ['drawModeFilledCircle', DrawMode.FILLED_CIRCLE],
+                ['drawModeCircle', DrawMode.CIRCLE],
+            ];
 
             document.addEventListener('DOMContentLoaded', function () {
                 const playfield = new Playfield(vcsPlayfieldRows);
@@ -95,12 +104,20 @@
                 document.getElementById('include_pf1').addEventListener('change', (e) => vcsData.setIncludeRegister(1, e.target.checked));
                 document.getElementById('include_pf2').addEventListener('change', (e) => vcsData.setIncludeRegister(2, e.target.checked));
 
+                idsAndModes.forEach(([id, mode]) => document.getElementById(id).addEventListener('click', () => editor.setDrawMode(mode)));
+
                 editor.updateCanvas();
             });
 
             document.addEventListener('editorStateChanged', (e) => {
                 [...document.getElementsByClassName('playfieldMode')].forEach((e) => e.classList.remove('selected'));
-                document.getElementById(e.detail.playfieldMode === PlayfieldMode.NORMAL ? 'playfieldNormalMode' : 'playfieldMirrorMode').classList.add('selected');
+                document
+                    .getElementById(e.detail.playfieldMode === PlayfieldMode.NORMAL ? 'playfieldNormalMode' : 'playfieldMirrorMode')
+                    .classList.add('selected');
+
+                [...document.getElementsByClassName('drawMode')].forEach((e) => e.classList.remove('selected'));
+                const selectedDrawModeId = idsAndModes.find(([id, mode]) => mode === e.detail.drawMode)?.[0];
+                document.getElementById(selectedDrawModeId)?.classList.add('selected');
 
                 document.getElementById('edit_mode_pf0').value = e.detail.registerModes[0];
                 document.getElementById('edit_mode_pf1').value = e.detail.registerModes[1];
@@ -150,6 +167,14 @@
                             <option value="CLEAR">clear</option>
                         </select>
                     </label>
+                </div>
+                <div class="toolbar">
+                    <button class="drawMode" id="drawModeScribble">Scribble</button>
+                    <button class="drawMode" id="drawModeLine">Line</button>
+                    <button class="drawMode" id="drawModeFilledRect">Filled rect</button>
+                    <button class="drawMode" id="drawModeRectangle">Rectangle</button>
+                    <button class="drawMode" id="drawModeFilledCircle">Filled circle</button>
+                    <button class="drawMode" id="drawModeCircle">Circle</button>
                 </div>
             </div>
             <div class="Data">

@@ -33,6 +33,10 @@ export class Playfield {
         this.#data = data ? this.#copyData(data) : this.#createEmptyData();
     }
 
+    copy() {
+        return new Playfield(this.#height, this.mode, this.data, this.getRegisterModes())
+    }
+
     #createEmptyData() {
         return Array(this.#height)
             .fill()

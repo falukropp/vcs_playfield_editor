@@ -1,13 +1,74 @@
 import { Playfield } from './playfield.js';
+
+export const DrawMode = {
+    SCRIBBLE: 'SCRIBBLE',
+    LINE: 'LINE',
+    FILLED_RECT: 'FILLED_RECT',
+    RECT: 'RECT',
+    FILLED_CIRCLE: 'FILLED_CIRCLE',
+    CIRCLE: 'CIRCLE',
+};
+
+const drawModeOperations = new Map();
+
+drawModeOperations.set(DrawMode.SCRIBBLE, {
+    onStart: (playfield, x, y, value) => {
+        playfield.setPixel(x, y, value);
+    },
+    onMove: (initialPlayfield, initalX, initalY, playfield, x, y, value) => {
+        playfield.setPixel(x, y, value);
+    },
+});
+
+drawModeOperations.set(DrawMode.FILLED_RECT, {
+    onStart: (playfield, x, y, value) => {
+        playfield.swapPixel(x, y, value);
+    },
+    onMove: (initialPlayfield, initialX, initialY, playfield, currentX, currentY, value) => {
+        playfield.data = initialPlayfield.data;
+        const [fromY, toY] = currentY <= initialY ? [currentY, initialY] : [initialY, currentY];
+        const [fromX, toX] = currentX <= initialX ? [currentX, initialX] : [initialX, currentX];
+        for (let y = fromY; y <= toY; ++y) {
+            for (let x = fromX; x <= toX; ++x) {
+                playfield.setPixel(x, y, value);
+            }
+        }
+    },
+});
+
+drawModeOperations.set(DrawMode.RECT, {
+    onStart: (playfield, x, y, value) => {
+        playfield.swapPixel(x, y, value);
+    },
+    onMove: (initialPlayfield, initialX, initialY, playfield, currentX, currentY, value) => {
+        playfield.data = initialPlayfield.data;
+        const [fromY, toY] = currentY <= initialY ? [currentY, initialY] : [initialY, currentY];
+        const [fromX, toX] = currentX <= initialX ? [currentX, initialX] : [initialX, currentX];
+
+        for (let x = fromX; x <= toX; ++x) {
+            playfield.setPixel(x, fromY, value);
+        }
+        for (let y = fromY; y <= toY; ++y) {
+            playfield.setPixel(fromX, y, value);
+            playfield.setPixel(toX, y, value);
+        }
+        for (let x = fromX; x <= toX; ++x) {
+            playfield.setPixel(x, toY, value);
+        }
+    },
+});
+
 export class Editor {
     #undos;
     #currentUndoLevel;
+    #drawMode;
 
     constructor(document, canvas, playfield) {
         this.document = document;
         this.canvas = canvas;
         this.playfield = playfield;
-        this.#updateGUIFromPlayfield()
+        this.#drawMode = DrawMode.SCRIBBLE;
+        this.#updateGUIFromPlayfield();
         this.#undos = new WeakMap(); // <Playfield, Playfield[]>
         this.#currentUndoLevel = 0;
 
@@ -44,9 +105,14 @@ export class Editor {
         }
     }
 
+    setDrawMode(mode) {
+        this.#drawMode = mode;
+        this.#updateGUIFromPlayfield();
+    }
+
     #pushUndo() {
         const undosForCurrentPlayfield = this.#undos.get(this.playfield)?.slice(0, this.#currentUndoLevel + 1) ?? [];
-        undosForCurrentPlayfield.push(new Playfield(this.playfield.height, this.playfield.mode, this.playfield.data, this.playfield.getRegisterModes()));
+        undosForCurrentPlayfield.push(this.playfield.copy());
         this.#currentUndoLevel = undosForCurrentPlayfield.length - 1;
         this.#undos.set(this.playfield, undosForCurrentPlayfield);
     }
@@ -54,12 +120,16 @@ export class Editor {
     #updateGUIFromPlayfield() {
         const registerModes = this.playfield.getRegisterModes();
         const playfieldMode = this.playfield.mode;
-        const event = new CustomEvent('editorStateChanged', { detail: { registerModes, playfieldMode } });
+        const event = new CustomEvent('editorStateChanged', { detail: { registerModes, playfieldMode, drawMode: this.#drawMode } });
         this.document.dispatchEvent(event);
     }
 
+    #getPlayfieldFromUndo() {
+        return this.#undos.get(this.playfield)[this.#currentUndoLevel];
+    }
+
     #setPlayfieldFromUndo() {
-        const oldPlayfield = this.#undos.get(this.playfield)[this.#currentUndoLevel];
+        const oldPlayfield = this.#getPlayfieldFromUndo();
         this.playfield.height = oldPlayfield.height;
         this.playfield.mode = oldPlayfield.mode;
         this.playfield.data = oldPlayfield.data;
@@ -93,11 +163,6 @@ export class Editor {
         };
     }
 
-    #drawPixel(mouseX, mouseY, value) {
-        const { playFieldX, playFieldY } = this.getPlayfieldCoordinatesFromMousePosition(mouseX, mouseY);
-        this.#drawVcsPixel(playFieldX, playFieldY, value);
-    }
-
     #drawVcsPixel(x, y, value) {
         if (this.playfield.swapPixel(x, y, value) !== value) {
             this.updateCanvas();
@@ -120,9 +185,26 @@ export class Editor {
         this.#updateGUIFromPlayfield();
     }
 
+    #intialPlayfield;
+
+    #startX;
+    #startY;
+    #lastX;
+    #lastY;
+
     mouseDown(e) {
         e.preventDefault();
-        this.#drawPixel(e.pageX, e.pageY, e.buttons & 2 ? 0 : 1);
+
+        this.#intialPlayfield = this.#getPlayfieldFromUndo().copy();
+        const { playFieldX, playFieldY } = this.getPlayfieldCoordinatesFromMousePosition(e.pageX, e.pageY);
+        this.#lastX = playFieldX;
+        this.#startX = playFieldX;
+        this.#lastY = playFieldY;
+        this.#startY = playFieldY;
+        const value = e.buttons & 2 ? 0 : 1;
+        drawModeOperations.get(this.#drawMode)?.onStart(this.playfield, playFieldX, playFieldY, value);
+
+        this.updateCanvas();
 
         this.document.addEventListener('mousemove', this.mouseMoveHandler);
         this.document.addEventListener('mouseup', this.mouseUpHandler);
@@ -130,12 +212,21 @@ export class Editor {
 
     mouseMove(e) {
         e.preventDefault();
-        this.#drawPixel(e.pageX, e.pageY, e.buttons & 2 ? 0 : 1);
+        const { playFieldX, playFieldY } = this.getPlayfieldCoordinatesFromMousePosition(e.pageX, e.pageY);
+        if (playFieldX !== this.#lastX || playFieldY !== this.#lastY) {
+            const value = e.buttons & 2 ? 0 : 1;
+            this.#lastX = playFieldX;
+            this.#lastY = playFieldY;
+            drawModeOperations.get(this.#drawMode)?.onMove(this.#intialPlayfield, this.#startX, this.#startY, this.playfield, playFieldX, playFieldY, value);
+
+            this.updateCanvas();
+        }
     }
 
     mouseUp(e) {
         this.document.removeEventListener('mousemove', this.mouseMoveHandler);
         this.document.removeEventListener('mouseup', this.mouseUpHandler);
+        this.#intialPlayfield = undefined;
         this.#pushUndo();
     }
 }
