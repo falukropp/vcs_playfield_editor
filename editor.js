@@ -5,8 +5,8 @@ export const DrawMode = {
     LINE: 'LINE',
     FILLED_RECT: 'FILLED_RECT',
     RECT: 'RECT',
-    FILLED_CIRCLE: 'FILLED_CIRCLE',
-    CIRCLE: 'CIRCLE',
+    FILLED_ELLIPSE: 'FILLED_ELLIPSE',
+    ELLIPSE: 'ELLIPSE',
 };
 
 const drawModeOperations = new Map();
@@ -54,6 +54,121 @@ drawModeOperations.set(DrawMode.RECT, {
         }
         for (let x = fromX; x <= toX; ++x) {
             playfield.setPixel(x, toY, value);
+        }
+    },
+});
+
+drawModeOperations.set(DrawMode.LINE, {
+    onStart: (playfield, x, y, value) => {
+        playfield.swapPixel(x, y, value);
+    },
+    onMove: (initialPlayfield, initialX, initialY, playfield, currentX, currentY, value) => {
+        playfield.data = initialPlayfield.data;
+        // Bresenham as described by wikipedia
+
+        const dx = Math.abs(initialX - currentX);
+        const dy = -Math.abs(initialY - currentY);
+        const sx = initialX < currentX ? 1 : -1;
+        const sy = initialY < currentY ? 1 : -1;
+        let err = dx + dy;
+        let x = initialX;
+        let y = initialY;
+        for (;;) {
+            playfield.setPixel(x, y, value);
+            if (x === currentX && y === currentY) break;
+            const e2 = err * 2;
+            if (e2 >= dy) {
+                err += dy;
+                x += sx;
+            }
+            if (e2 <= dx) {
+                err += dx;
+                y += sy;
+            }
+        }
+    },
+});
+
+drawModeOperations.set(DrawMode.ELLIPSE, {
+    onStart: (playfield, x, y, value) => {
+        playfield.swapPixel(x, y, value);
+    },
+    onMove: (initialPlayfield, initialX, initialY, playfield, currentX, currentY, value) => {
+        playfield.data = initialPlayfield.data;
+        // From http://members.chello.at/~easyfilter/Bresenham.pdf
+
+        const a = Math.abs(currentX - initialX);
+        const b = Math.abs(currentY - initialY);
+
+        let x = -a;
+        let y = 0;
+        let e2 = b * b;
+        let err = x * (2 * e2 + x) + e2;
+
+        do {
+            playfield.setPixel(initialX - x, initialY + y, value);
+            playfield.setPixel(initialX + x, initialY + y, value);
+            playfield.setPixel(initialX + x, initialY - y, value);
+            playfield.setPixel(initialX - x, initialY - y, value);
+            e2 = 2 * err;
+            if (e2 >= (x * 2 + 1) * b * b) {
+                ++x;
+                err += (x * 2 + 1) * b * b;
+            }
+            if (e2 <= (y * 2 + 1) * a * a) {
+                ++y;
+                err += (y * 2 + 1) * a * a;
+            }
+        } while (x <= 0);
+
+        while (y++ < b) {
+            playfield.setPixel(initialX, initialY + y, value);
+            playfield.setPixel(initialX, initialY - y, value);
+        }
+    },
+});
+
+drawModeOperations.set(DrawMode.FILLED_ELLIPSE, {
+    onStart: (playfield, x, y, value) => {
+        playfield.swapPixel(x, y, value);
+    },
+    onMove: (initialPlayfield, initialX, initialY, playfield, currentX, currentY, value) => {
+        playfield.data = initialPlayfield.data;
+
+        const a = Math.abs(currentX - initialX);
+        const b = Math.abs(currentY - initialY);
+
+        let x = -a;
+        let y = 0;
+        let e2 = b * b;
+        let err = x * (2 * e2 + x) + e2;
+
+        do {
+
+            playfield.setPixel(initialX - x, initialY + y, value);
+            playfield.setPixel(initialX + x, initialY + y, value);
+            playfield.setPixel(initialX + x, initialY - y, value);
+            playfield.setPixel(initialX - x, initialY - y, value);
+            e2 = 2 * err;
+            if (e2 >= (x * 2 + 1) * b * b) {
+                ++x;
+                err += (x * 2 + 1) * b * b;
+            }
+            if (e2 <= (y * 2 + 1) * a * a) {
+                for (let fx = -x; fx >= 0 ; --fx) {
+                    playfield.setPixel(initialX - fx, initialY + y, value);
+                    playfield.setPixel(initialX + fx, initialY + y, value);
+                    playfield.setPixel(initialX + fx, initialY - y, value);
+                    playfield.setPixel(initialX - fx, initialY - y, value);        
+                }
+                ++y;
+                err += (y * 2 + 1) * a * a;
+            }
+        } while (x <= 0);
+
+        while (y++ < b) {
+            playfield.setPixel(initialX, initialY + y, value);
+            playfield.setPixel(initialX, initialY - y, value);
         }
     },
 });

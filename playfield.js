@@ -44,14 +44,14 @@ export class Playfield {
     }
 
     setPixel(x, y, value) {
-        if (x < 0 || x >= PLAYFIELD_WIDTH || y < 0 || y > this.#height) {
+        if (x < 0 || x >= PLAYFIELD_WIDTH || y < 0 || y >= this.#height) {
             return;
         }
         this.#updatePixels(x, y, value);
     }
 
     swapPixel(x, y, value) {
-        if (x < 0 || x >= PLAYFIELD_WIDTH || y < 0 || y > this.#height) {
+        if (x < 0 || x >= PLAYFIELD_WIDTH || y < 0 || y >= this.#height) {
             return value;
         }
         const oldValue = this.#data[y][x];
