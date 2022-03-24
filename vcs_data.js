@@ -1,9 +1,11 @@
 export class VCSData {
     #includeRegisters;
+    #gameData;
+    #textarea;
 
-    constructor(textarea, playfield) {
-        this.textarea = textarea;
-        this.playfield = playfield;
+    constructor(textarea, gameData) {
+        this.#textarea = textarea;
+        this.#gameData = gameData;
         this.#includeRegisters = Array(3).fill(true);
     }
 
@@ -15,10 +17,17 @@ export class VCSData {
         this.#includeRegisters[register] = !!include;
     }
 
-    updateFromPlayfield() {
-        const playfieldData = this.playfield.data;
-        const getPaddedByte = (num) => num.toString(2).padStart(8, '0');
+    updateFromGameData() {
         let text = '';
+        text += this.#gameData.getPaletteData().map(this.#updateFromPlayfield, this).join(`\n`)
+        // Do something with mapdata too.
+
+        this.#textarea.value = text
+    }
+
+    #updateFromPlayfield(playfieldData, idx) {
+        const getPaddedByte = (num) => num.toString(2).padStart(8, '0');
+        let text = `# room ${idx}\n`;
 
         playfieldData.forEach((row) => {
             const PF = [0, 0, 0];
@@ -48,6 +57,6 @@ export class VCSData {
             text += `.byte ${rowData.join(', ')}\n`;
         });
 
-        this.textarea.value = text;
+        return text;
     }
 }

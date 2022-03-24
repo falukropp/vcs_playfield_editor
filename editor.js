@@ -1,5 +1,3 @@
-import { Playfield } from './playfield.js';
-
 export const DrawMode = {
     SCRIBBLE: 'SCRIBBLE',
     LINE: 'LINE',

@@ -32,7 +32,8 @@
                 gap: 0px 0px;
                 grid-template-areas:
                     'Data Map Commands'
-                    'Data Map Editor';
+                    'Data Map Editor'
+                    'Data Map Palette';
             }
 
             .Editor {
@@ -67,7 +68,9 @@
             import { Playfield, PlayfieldMode } from './playfield.js';
             import { DrawMode, Editor } from './editor.js';
             import { VCSData } from './vcs_data.js';
+            import { GameData } from './gamedata.js';
 
+            const gameData = new GameData();
             const vcsRows = 192;
             const scanLinesPerVcsRow = 12; // Should be maybe modifiable
             const vcsPlayfieldRows = vcsRows / scanLinesPerVcsRow;
@@ -86,9 +89,12 @@
 
                 const canvas = document.getElementById('playfield');
                 canvas.oncontextmenu = () => false;
+
                 const editor = new Editor(document, canvas, playfield);
 
-                const vcsData = new VCSData(document.getElementById('vcs_data'), playfield);
+                gameData.addPlayfield(playfield)
+
+                const vcsData = new VCSData(document.getElementById('vcs_data'), gameData);
 
                 document.getElementById('playfieldNormalMode').addEventListener('click', () => editor.setEditorMode(PlayfieldMode.NORMAL));
                 document.getElementById('playfieldMirrorMode').addEventListener('click', () => editor.setEditorMode(PlayfieldMode.REFLECTED));
@@ -99,7 +105,7 @@
                 document.getElementById('edit_mode_pf1').addEventListener('change', (e) => editor.setRegisterMode(1, e.target.value));
                 document.getElementById('edit_mode_pf2').addEventListener('change', (e) => editor.setRegisterMode(2, e.target.value));
 
-                document.getElementById('updateData').addEventListener('click', () => vcsData.updateFromPlayfield());
+                document.getElementById('updateData').addEventListener('click', () => vcsData.updateFromGameData());
                 document.getElementById('include_pf0').addEventListener('change', (e) => vcsData.setIncludeRegister(0, e.target.checked));
                 document.getElementById('include_pf1').addEventListener('change', (e) => vcsData.setIncludeRegister(1, e.target.checked));
                 document.getElementById('include_pf2').addEventListener('change', (e) => vcsData.setIncludeRegister(2, e.target.checked));
@@ -188,7 +194,8 @@
                     </div>
                 </div>
             </div>
-            <div class="Map"></div>
+            <div class="Palette">Palette</div>
+            <div class="Map">Map</div>
         </div>
     </body>
 </html>
