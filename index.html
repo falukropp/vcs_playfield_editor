@@ -11,6 +11,9 @@
             import { DrawMode, Editor } from './editor.js';
             import { VCSData } from './vcs_data.js';
             import { GameData } from './gamedata.js';
+            import { EVENTS, CustomEventHandler } from './custom_event_handler.js';
+
+            const customEventHandler = new CustomEventHandler(document);
 
             const gameData = new GameData();
             const vcsRows = 192;
@@ -32,7 +35,7 @@
                 const canvas = document.getElementById('playfield');
                 canvas.oncontextmenu = () => false;
 
-                const editor = new Editor(document, canvas, playfield);
+                const editor = new Editor(document, customEventHandler, canvas, playfield);
 
                 gameData.addPlayfield(playfield)
 
@@ -57,7 +60,7 @@
                 editor.updateCanvas();
             });
 
-            document.addEventListener('editorStateChanged', (e) => {
+            customEventHandler.addEventListener(EVENTS.EDITOR_STATE_CHANGED, (e) => {
                 [...document.getElementsByClassName('playfieldMode')].forEach((e) => e.classList.remove('selected'));
                 document
                     .getElementById(e.detail.playfieldMode === PlayfieldMode.NORMAL ? 'playfieldNormalMode' : 'playfieldMirrorMode')
@@ -137,8 +140,9 @@
                 </div>
             </div>
             <div class="Palette">
-                <canvas  width="64" height="48"></canvas>
-                <canvas  width="64" height="48"></canvas>
+                <!-- 40 * 32 is not quit 4:3 aspect ration, but should be close enough. -->
+                <canvas  width="40" height="32"></canvas>
+                <canvas  width="40" height="32"></canvas>
             </div>
             <div class="Map">Map</div>
         </div>

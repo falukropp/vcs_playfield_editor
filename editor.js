@@ -176,8 +176,9 @@ export class Editor {
     #currentUndoLevel;
     #drawMode;
 
-    constructor(document, canvas, playfield) {
+    constructor(document, eventHandler, canvas, playfield) {
         this.document = document;
+        this.eventHandler = eventHandler;
         this.canvas = canvas;
         this.playfield = playfield;
         this.#drawMode = DrawMode.SCRIBBLE;
@@ -233,8 +234,7 @@ export class Editor {
     #updateGUIFromPlayfield() {
         const registerModes = this.playfield.getRegisterModes();
         const playfieldMode = this.playfield.mode;
-        const event = new CustomEvent('editorStateChanged', { detail: { registerModes, playfieldMode, drawMode: this.#drawMode } });
-        this.document.dispatchEvent(event);
+        this.eventHandler.sendEditorStateChanged(registerModes, playfieldMode, this.#drawMode);
     }
 
     #getPlayfieldFromUndo() {
