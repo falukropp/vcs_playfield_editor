@@ -2,7 +2,7 @@ body {
     margin: 0px;
 }
 
-canvas {
+#playfield {
     background-color: white;
     max-width: 100%;
     max-height: 100%;
@@ -54,11 +54,25 @@ canvas {
 
 .Palette {
     grid-area: Palette;
-    display: grid;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: start;
+    overflow-y: scroll;
 }
 
 .Palette canvas {
+    margin: 3px;
+    max-width: 40px;
+    max-height: 32px;
     border: 3px solid black;
+}
+
+.add-new-playfield {
+    display: grid;
+    place-items: center;
+    margin: 3px;
+    width: 46px;
+    height: 38px;
 }
 
 button.selected {
