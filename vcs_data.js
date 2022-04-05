@@ -19,7 +19,7 @@ export class VCSData {
 
     updateFromGameData() {
         let text = '';
-        text += this.#gameData.getPaletteData().map(this.#updateFromPlayfield, this).join(`\n`)
+        text += this.#gameData.getAllPaletteData().map(this.#updateFromPlayfield, this).join(`\n`)
         // Do something with mapdata too.
 
         this.#textarea.value = text

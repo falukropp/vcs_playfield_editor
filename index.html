@@ -11,9 +11,12 @@
             import { DrawMode, Editor } from './editor.js';
             import { VCSData } from './vcs_data.js';
             import { GameData } from './gamedata.js';
+            import { Palette } from './palette.js';
             import { EVENTS, CustomEventHandler } from './custom_event_handler.js';
 
             const customEventHandler = new CustomEventHandler(document);
+
+            let palette
 
             const gameData = new GameData();
             const vcsRows = 192;
@@ -30,14 +33,15 @@
             ];
 
             document.addEventListener('DOMContentLoaded', function () {
-                const playfield = new Playfield(vcsPlayfieldRows);
+                
+                gameData.addPlayfield(vcsPlayfieldRows)
+
+                palette = new Palette(document.getElementById('palette'), gameData)
 
                 const canvas = document.getElementById('playfield');
                 canvas.oncontextmenu = () => false;
 
-                const editor = new Editor(document, customEventHandler, canvas, playfield);
-
-                gameData.addPlayfield(playfield)
+                const editor = new Editor(document, customEventHandler, canvas, gameData.clonePlayfield());
 
                 const vcsData = new VCSData(document.getElementById('vcs_data'), gameData);
 
@@ -73,6 +77,10 @@
                 document.getElementById('edit_mode_pf0').value = e.detail.registerModes[0];
                 document.getElementById('edit_mode_pf1').value = e.detail.registerModes[1];
                 document.getElementById('edit_mode_pf2').value = e.detail.registerModes[2];
+            });
+            customEventHandler.addEventListener(EVENTS.EDITOR_CONTENT_CHANGED, (e) => {
+                gameData.setData(e.detail.data)
+                palette.redrawAllGameData()
             });
         </script>
     </head>
@@ -139,53 +147,13 @@
                     </div>
                 </div>
             </div>
-            <div class="Palette">
+            <div id="palette">
                 <!-- 
                     40 * 32 is not quit 4:3 aspect ratio, but should be close enough. 
                     The playfields are 40*16 vcr_pixels big, so they map to 1*2 pixels
                 <canvas  width="40" height="32"></canvas>
                 -->
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <canvas  width="40" height="32"></canvas>
-                <div class="add-new-playfield"><button>+</button></div>
+                <div id="add-new-playfield"><button>+</button></div>
             </div>
             <div class="Map">Map</div>
         </div>

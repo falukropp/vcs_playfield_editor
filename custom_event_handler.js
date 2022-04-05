@@ -1,5 +1,6 @@
 export const EVENTS = {
-    EDITOR_STATE_CHANGED: 'EVENT_EDITOR_STATE_CHANGED',
+    EDITOR_STATE_CHANGED: 'EDITOR_STATE_CHANGED',
+    EDITOR_CONTENT_CHANGED: 'EDITOR_CONTENT_CHANGED',
 };
 // Add / Edit / Remove / Select playfield?
 // Add / Remove map?
@@ -19,5 +20,9 @@ export class CustomEventHandler {
 
     sendEditorStateChanged(registerModes, playfieldMode, drawMode) {
         this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.EDITOR_STATE_CHANGED, { detail: { registerModes, playfieldMode, drawMode } }));
+    }
+
+    sendEditorDataChanged(data) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.EDITOR_CONTENT_CHANGED, { detail: {data} }));
     }
 }

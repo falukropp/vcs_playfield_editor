@@ -52,7 +52,7 @@ body {
     background-color: chocolate;
 }
 
-.Palette {
+#palette {
     grid-area: Palette;
     display: flex;
     flex-wrap: wrap;
@@ -60,14 +60,14 @@ body {
     overflow-y: scroll;
 }
 
-.Palette canvas {
+#palette canvas {
     margin: 3px;
     max-width: 40px;
     max-height: 32px;
     border: 3px solid black;
 }
 
-.add-new-playfield {
+#add-new-playfield {
     display: grid;
     place-items: center;
     margin: 3px;

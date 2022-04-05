@@ -11,14 +11,18 @@ export const PlayfieldRegisterMode = {
 
 export const PLAYFIELD_WIDTH = 40;
 
+let nextId = 0;
+
 export class Playfield {
     #data;
     #mode;
     // TODO: Probably remove this? Must always be #data.length
     #height;
     #registerModes;
+    #id;
 
     constructor(height, mode = PlayfieldMode.NORMAL, data, registerModes) {
+        this.#id = nextId++;
         if (registerModes && registerModes.length != 3) {
             throw new Error(`Weird registerModes! ${registerModes}`);
         }
@@ -34,7 +38,18 @@ export class Playfield {
     }
 
     copy() {
-        return new Playfield(this.#height, this.mode, this.data, this.getRegisterModes())
+        return new Playfield(this.#height, this.mode, this.data, this.getRegisterModes());
+    }
+
+    clone() {
+        const copy = new Playfield(this.#height, this.mode, this.data, this.getRegisterModes());
+        copy.#id = this.#id
+        return copy
+    }
+
+
+    get id() {
+        return this.#id
     }
 
     #createEmptyData() {
@@ -124,7 +139,6 @@ export class Playfield {
 
         this.#data = this.#copyData(data);
     }
-
 
     get width() {
         return PLAYFIELD_WIDTH;
