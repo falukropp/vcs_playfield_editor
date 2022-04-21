@@ -10,12 +10,16 @@ export class GameData {
 
     constructor(eventHandler, playfieldHeight) {
         this.#eventHandler = eventHandler;
-        this.#playfieldHeight = playfieldHeight
+        this.#playfieldHeight = playfieldHeight;
 
         this.addPlayfield(this.#playfieldHeight);
 
         this.#eventHandler.addEventListener(COMMANDS.CHANGE_PLAYFIELD_DATA, (e) => {
             this.setData(e.detail.data, e.detail.id);
+        });
+
+        this.#eventHandler.addEventListener(COMMANDS.CHANGE_PLAYFIELD_STATE, (e) => {
+            this.#setModeAndReqisterMode(e.detail.playfieldMode, e.detail.registerModes, e.detail.id)
         });
 
         this.#eventHandler.addEventListener(COMMANDS.ADD_PLAYFIELD, (e) => {
@@ -29,7 +33,7 @@ export class GameData {
         if (!this.#currentlySelected) {
             this.#currentlySelected = newPlayField.id;
         }
-        this.#eventHandler.sendPlayfieldAdded(newPlayField.id, this.#palette.length-1)
+        this.#eventHandler.sendPlayfieldAdded(newPlayField.id, this.#palette.length - 1);
     }
 
     removePlayField(id) {
@@ -56,23 +60,44 @@ export class GameData {
         return this.#palette.findIndex((p) => p.id === id);
     }
 
-
     setData(data, id = this.#currentlySelected) {
         const playfield = this.#getPlayField(id);
         if (playfield) {
             playfield.data = data;
-            this.#eventHandler.sendPlayfieldDataChanged(id, data)
+            this.#eventHandler.sendPlayfieldDataChanged(id, data);
+        }
+    }
+
+    #setModeAndReqisterMode(mode, registerModes, id = this.#currentlySelected) {
+        const playfield = this.#getPlayField(id);
+        if (playfield) {
+            playfield.mode = mode;
+            playfield.setRegisterModes(registerModes);
+            this.#eventHandler.sendPlayfieldStateChanged(id, registerModes, mode);
+        }
+    }
+
+    setRegisterMode(registerModes, id = this.#currentlySelected) {
+        const playfield = this.#getPlayField(id);
+        if (playfield) {
+            const mode = playfield.mode;
+            playfield.setRegisterModes(registerModes);
+            this.#eventHandler.sendPlayfieldStateChanged(id, registerModes, mode);
         }
     }
 
     setMode(mode, id = this.#currentlySelected) {
-        this.#getPlayField(id)?.setMode(mode);
-        this.#eventHandler.sendPlayfieldDataChanged(id, data)
+        const playfield = this.#getPlayField(id);
+        if (playfield) {
+            playfield.mode = mode;
+            const registerModes = playfield.getRegisterModes();
+            playfield.sendPlayfieldStateChanged(id, registerModes, mode);
+        }
     }
 
     setRegisterMode(registerModes, id = this.#currentlySelected) {
         this.#getPlayField(id)?.setRegisterModes(registerModes);
-        this.#eventHandler.sendPlayfieldDataChanged(id, data)
+        this.#eventHandler.sendPlayfieldDataChanged(id, data);
     }
 
     removeMap(idx) {
@@ -94,7 +119,6 @@ export class GameData {
     getPlayfieldIdAtIdx(idx) {
         return this.#palette[idx].id;
     }
-
 
     getMode(id = this.#currentlySelected) {
         return this.#getPlayField(id)?.mode;

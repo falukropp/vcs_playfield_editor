@@ -32,12 +32,12 @@ export class CustomEventHandler {
         this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_ADDED, {detail: {id, idx} }));
     }
     
-    sendChangePlayfieldState(registerModes, playfieldMode, drawMode) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.CHANGE_PLAYFIELD_STATE, { detail: { registerModes, playfieldMode, drawMode } }));
+    sendChangePlayfieldState(id, registerModes, playfieldMode) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.CHANGE_PLAYFIELD_STATE, { detail: { id, registerModes, playfieldMode} }));
     }
 
-    sendPlayfieldStateChanged(registerModes, playfieldMode, drawMode) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_STATE_CHANGED, { detail: { registerModes, playfieldMode, drawMode } }));
+    sendPlayfieldStateChanged(id, registerModes, playfieldMode) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_STATE_CHANGED, { detail: { id, registerModes, playfieldMode} }));
     }
 
     sendChangePlayfieldData(id, data) {

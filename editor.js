@@ -1,4 +1,4 @@
-import { COMMANDS } from './custom_event_handler.js';
+import { EVENTS } from './custom_event_handler.js';
 import { PlayfieldMode } from './playfield.js';
 
 
@@ -194,8 +194,7 @@ export class Editor {
         this.eventHandler = eventHandler;
         this.canvas = document.getElementById('editor_playfield');
         this.#editorPlayfield = initialPlayfield.clone();
-        this.#drawMode = DrawMode.SCRIBBLE;
-        this.#updateGUIFromPlayfield();
+        this.setDrawMode(DrawMode.SCRIBBLE)
         this.#undos = new Map(); // <number, Playfield[]>
         this.#currentUndoLevel = 0;
 
@@ -211,18 +210,15 @@ export class Editor {
         this.canvas.oncontextmenu = () => false;
         this.canvas.addEventListener('mousedown', this.mouseDownHandler);
 
-        eventHandler.addEventListener(COMMANDS.EDITOR_STATE_CHANGE, (e) => {
+        eventHandler.addEventListener(EVENTS.PLAYFIELD_STATE_CHANGED, (e) => {
             [...document.getElementsByClassName('playfieldMode')].forEach((e) => e.classList.remove('selected'));
             document.getElementById(e.detail.playfieldMode === PlayfieldMode.NORMAL ? 'playfieldNormalMode' : 'playfieldMirrorMode').classList.add('selected');
-
-            [...document.getElementsByClassName('drawMode')].forEach((e) => e.classList.remove('selected'));
-            const selectedDrawModeId = idsAndModes.find(([id, mode]) => mode === e.detail.drawMode)?.[0];
-            document.getElementById(selectedDrawModeId)?.classList.add('selected');
 
             document.getElementById('edit_mode_pf0').value = e.detail.registerModes[0];
             document.getElementById('edit_mode_pf1').value = e.detail.registerModes[1];
             document.getElementById('edit_mode_pf2').value = e.detail.registerModes[2];
         });
+        this.#handlePlayfieldStateChanges();
 
         document.getElementById('playfieldNormalMode').addEventListener('click', () => this.setEditorMode(PlayfieldMode.NORMAL));
         document.getElementById('playfieldMirrorMode').addEventListener('click', () => this.setEditorMode(PlayfieldMode.REFLECTED));
@@ -259,9 +255,12 @@ export class Editor {
         }
     }
 
-    setDrawMode(mode) {
-        this.#drawMode = mode;
-        this.#updateGUIFromPlayfield();
+    setDrawMode(newMode) {
+        this.#drawMode = newMode;
+
+        [...document.getElementsByClassName('drawMode')].forEach((e) => e.classList.remove('selected'));
+        const selectedDrawModeId = idsAndModes.find(([id, mode]) => mode === newMode)?.[0];
+        document.getElementById(selectedDrawModeId)?.classList.add('selected');
     }
 
     #pushUndo() {
@@ -271,10 +270,11 @@ export class Editor {
         this.#undos.set(this.#editorPlayfield.id, undosForCurrentPlayfield);
     }
 
-    #updateGUIFromPlayfield() {
+    #handlePlayfieldStateChanges() {
         const registerModes = this.#editorPlayfield.getRegisterModes();
         const playfieldMode = this.#editorPlayfield.mode;
-        this.eventHandler.sendPlayfieldStateChanged(registerModes, playfieldMode, this.#drawMode);
+        this.eventHandler.sendChangePlayfieldState(this.#editorPlayfield.id, registerModes, playfieldMode);
+        this.eventHandler.sendChangePlayfieldData(this.#editorPlayfield.id, this.#editorPlayfield.data);
     }
 
     #getPlayfieldFromUndo() {
@@ -290,7 +290,7 @@ export class Editor {
 
         this.eventHandler.sendChangePlayfieldData(this.#editorPlayfield.id, this.#editorPlayfield.data);
 
-        this.#updateGUIFromPlayfield();
+        this.#handlePlayfieldStateChanges();
         this.updateCanvasFromEditorPlayfield();
     }
 
@@ -323,7 +323,7 @@ export class Editor {
             this.#editorPlayfield.mode = newMode;
             this.updateCanvasFromEditorPlayfield();
             this.#pushUndo();
-            this.#updateGUIFromPlayfield();
+            this.#handlePlayfieldStateChanges();
         }
     }
 
@@ -331,7 +331,7 @@ export class Editor {
         this.#editorPlayfield.setRegisterMode(register, newMode);
         this.updateCanvasFromEditorPlayfield();
         this.#pushUndo();
-        this.#updateGUIFromPlayfield();
+        this.#handlePlayfieldStateChanges();
     }
 
     #intialPlayfield;
