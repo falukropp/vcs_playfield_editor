@@ -1,9 +1,15 @@
-export const EVENTS = {
-    EDITOR_STATE_CHANGED: 'EDITOR_STATE_CHANGED',
-    EDITOR_CONTENT_CHANGED: 'EDITOR_CONTENT_CHANGED',
+export const COMMANDS = {    
+    ADD_PLAYFIELD: 'ADD_PLAYFIELD',
+    CHANGE_PLAYFIELD_DATA: 'CHANGE_PLAYFIELD_DATA',
+    CHANGE_PLAYFIELD_STATE: 'CHANGE_PLAYFIELD_STATE',
 };
-// Add / Edit / Remove / Select playfield?
-// Add / Remove map?
+
+
+export const EVENTS = {    
+    PLAYFIELD_ADDED: 'PLAYFIELD_ADDED',
+    PLAYFIELD_STATE_CHANGED: 'PLAYFIELD_STATE_CHANGED',
+    PLAYFIELD_DATA_CHANGED: 'PLAYFIELD_DATA_CHANGED',
+};
 
 export class CustomEventHandler {
     #eventTarget;
@@ -18,11 +24,27 @@ export class CustomEventHandler {
         this.#eventTarget.addEventListener(event, fn);
     }
 
-    sendEditorStateChanged(registerModes, playfieldMode, drawMode) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.EDITOR_STATE_CHANGED, { detail: { registerModes, playfieldMode, drawMode } }));
+    sendAddPlayField() {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_PLAYFIELD));
+    }
+    
+    sendPlayfieldAdded(id, idx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_ADDED, {detail: {id, idx} }));
+    }
+    
+    sendChangePlayfieldState(registerModes, playfieldMode, drawMode) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.CHANGE_PLAYFIELD_STATE, { detail: { registerModes, playfieldMode, drawMode } }));
     }
 
-    sendEditorDataChanged(data) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.EDITOR_CONTENT_CHANGED, { detail: {data} }));
+    sendPlayfieldStateChanged(registerModes, playfieldMode, drawMode) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_STATE_CHANGED, { detail: { registerModes, playfieldMode, drawMode } }));
+    }
+
+    sendChangePlayfieldData(id, data) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.CHANGE_PLAYFIELD_DATA, { detail: {id, data} }));
+    }
+
+    sendPlayfieldDataChanged(id, data) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_DATA_CHANGED, { detail: {id, data} }));
     }
 }

@@ -1,39 +1,78 @@
+import { EVENTS } from './custom_event_handler.js';
+
 export class Palette {
     #paletteArea;
+    #addNewPlayfieldButton;
+
     #gameData;
+    #eventHandler;
 
     #canvasWidth = 40;
     #canvasHeight = 32;
 
-    constructor(palettarea, gameData) {
-        this.#paletteArea = palettarea;
+    constructor(document, eventHandler, gameData) {
+        this.#paletteArea = document.getElementById('palette');
+        this.#addNewPlayfieldButton = document.getElementById('add-new-playfield');
+
         this.#gameData = gameData;
-        this.redrawAllGameData()
+        this.#eventHandler = eventHandler;
+        this.redrawAllGameData();
+
+        this.#paletteArea.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.nodeName !== 'CANVAS') return;
+            const targetPlayfieldId = target.dataset.playfieldId;
+            if (targetPlayfieldId === gameData.currentlySelected) return;
+
+            [...document.getElementsByClassName('selectedPlayField')].forEach((e) => e.classList.remove('selectedPlayField'));
+            gameData.currentlySelected = targetPlayfieldId;
+            target.classList.add('selectedPlayField');
+        });
+
+        document.getElementById('add-new-playfield').addEventListener('click', () => {
+            this.#eventHandler.sendAddPlayField();
+        });
+
+        this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_DATA_CHANGED, (e) => {
+            this.redrawGameData(e.detail.id);
+        });
+
+        this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_ADDED, (e) => {
+            this.#addNewPlayField(e.detail.id);
+        });
     }
 
-    redrawSelected() {
-
+    redrawGameData(id) {
+        const idx = this.#gameData.getIdxOfId(id);
+        if (idx !== -1) {
+            const canvases = this.#paletteArea.getElementsByTagName('canvas');
+            this.#updateCanvas(this.#gameData.getPaletteDataAtIdx(idx), canvases[idx]);
+        }
     }
 
-    redrawAllGameData(start, end) {
+    #addNewPlayField(playFieldId) {
+        this.#addNewPlayfieldButton.insertAdjacentHTML(
+            'beforeBegin',
+            `<canvas width="${this.#canvasWidth}" height="${this.#canvasHeight}" data-playfieldId="${playFieldId}"></canvas>`
+        );
+    }
+
+    redrawAllGameData() {
         const paletteEntries = this.#gameData.getAllPaletteData();
         const numberOfPaletteEntries = paletteEntries.length;
-
-        if (start === undefined || start < 0) start = 0;
-        if (end === undefined || end > numberOfPaletteEntries) end = numberOfPaletteEntries;
 
         const canvases = this.#paletteArea.getElementsByTagName('canvas');
         const currentNumberOfCanvases = canvases.length;
 
-        if (end > currentNumberOfCanvases) {
-            const addNewPlayfieldButton = this.#paletteArea.ownerDocument.getElementById('add-new-playfield');
-            for (let childIdx = currentNumberOfCanvases; childIdx < end; ++childIdx) {
-                addNewPlayfieldButton.insertAdjacentHTML('beforeBegin', `<canvas width="${this.#canvasWidth}" height="${this.#canvasHeight}"></canvas>`);
+        if (numberOfPaletteEntries > currentNumberOfCanvases) {
+            for (let childIdx = currentNumberOfCanvases; childIdx < numberOfPaletteEntries; ++childIdx) {
+                const playFieldId = this.#gameData.getPlayfieldIdAtIdx(childIdx);
+                this.#addNewPlayField(playFieldId);
             }
         }
 
-        for (let canvasIdx = start; canvasIdx < end ; ++canvasIdx) {
-            this.#updateCanvas(paletteEntries[canvasIdx], canvases[canvasIdx])
+        for (let canvasIdx = 0; canvasIdx < numberOfPaletteEntries; ++canvasIdx) {
+            this.#updateCanvas(paletteEntries[canvasIdx], canvases[canvasIdx]);
         }
 
         /*
@@ -45,8 +84,6 @@ export class Palette {
         }
         */
     }
-
-    selectPlayfield(idx) {}
 
     removePlayfield(idx) {}
 

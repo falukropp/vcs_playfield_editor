@@ -1,14 +1,35 @@
 import { Playfield } from './playfield.js';
+import { COMMANDS } from './custom_event_handler.js';
 
 export class GameData {
     #palette = [];
     #map = [];
     #currentlySelected;
+    #eventHandler;
+    #playfieldHeight;
 
-    addPlayfield(height, mode, data, registerModes) {
-        const newPlayField = new Playfield(height, mode, data, registerModes);
+    constructor(eventHandler, playfieldHeight) {
+        this.#eventHandler = eventHandler;
+        this.#playfieldHeight = playfieldHeight
+
+        this.addPlayfield(this.#playfieldHeight);
+
+        this.#eventHandler.addEventListener(COMMANDS.CHANGE_PLAYFIELD_DATA, (e) => {
+            this.setData(e.detail.data, e.detail.id);
+        });
+
+        this.#eventHandler.addEventListener(COMMANDS.ADD_PLAYFIELD, (e) => {
+            this.addPlayfield(this.#playfieldHeight);
+        });
+    }
+
+    addPlayfield(height) {
+        const newPlayField = new Playfield(height);
         this.#palette.push(newPlayField);
-        this.#currentlySelected ??= newPlayField.id;
+        if (!this.#currentlySelected) {
+            this.#currentlySelected = newPlayField.id;
+        }
+        this.#eventHandler.sendPlayfieldAdded(newPlayField.id, this.#palette.length-1)
     }
 
     removePlayField(id) {
@@ -31,19 +52,27 @@ export class GameData {
         return this.#palette.find((p) => p.id === id);
     }
 
+    getIdxOfId(id) {
+        return this.#palette.findIndex((p) => p.id === id);
+    }
+
+
     setData(data, id = this.#currentlySelected) {
         const playfield = this.#getPlayField(id);
         if (playfield) {
             playfield.data = data;
+            this.#eventHandler.sendPlayfieldDataChanged(id, data)
         }
     }
 
     setMode(mode, id = this.#currentlySelected) {
         this.#getPlayField(id)?.setMode(mode);
+        this.#eventHandler.sendPlayfieldDataChanged(id, data)
     }
 
     setRegisterMode(registerModes, id = this.#currentlySelected) {
         this.#getPlayField(id)?.setRegisterModes(registerModes);
+        this.#eventHandler.sendPlayfieldDataChanged(id, data)
     }
 
     removeMap(idx) {
@@ -57,6 +86,15 @@ export class GameData {
     getPaletteData(id = this.#currentlySelected) {
         return this.#getPlayField(id)?.data;
     }
+
+    getPaletteDataAtIdx(idx) {
+        return this.#palette[idx].data;
+    }
+
+    getPlayfieldIdAtIdx(idx) {
+        return this.#palette[idx].id;
+    }
+
 
     getMode(id = this.#currentlySelected) {
         return this.#getPlayField(id)?.mode;

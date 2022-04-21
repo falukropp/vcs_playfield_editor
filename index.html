@@ -5,82 +5,26 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>VCS Editor</title>
-        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="style.css" />
         <script type="module">
             import { Playfield, PlayfieldMode } from './playfield.js';
             import { DrawMode, Editor } from './editor.js';
             import { VCSData } from './vcs_data.js';
             import { GameData } from './gamedata.js';
             import { Palette } from './palette.js';
-            import { EVENTS, CustomEventHandler } from './custom_event_handler.js';
+            import { COMMANDS, EVENTS, CustomEventHandler } from './custom_event_handler.js';
 
             const customEventHandler = new CustomEventHandler(document);
 
-            let palette
-
-            const gameData = new GameData();
             const vcsRows = 192;
             const scanLinesPerVcsRow = 12; // Should be maybe modifiable
             const vcsPlayfieldRows = vcsRows / scanLinesPerVcsRow;
-
-            const idsAndModes = [
-                ['drawModeScribble', DrawMode.SCRIBBLE],
-                ['drawModeLine', DrawMode.LINE],
-                ['drawModeFilledRect', DrawMode.FILLED_RECT],
-                ['drawModeRectangle', DrawMode.RECT],
-                ['drawModeFilledEllipse', DrawMode.FILLED_ELLIPSE],
-                ['drawModeEllipse', DrawMode.ELLIPSE],
-            ];
+            const gameData = new GameData(customEventHandler, vcsPlayfieldRows);
 
             document.addEventListener('DOMContentLoaded', function () {
-                
-                gameData.addPlayfield(vcsPlayfieldRows)
-
-                palette = new Palette(document.getElementById('palette'), gameData)
-
-                const canvas = document.getElementById('playfield');
-                canvas.oncontextmenu = () => false;
-
-                const editor = new Editor(document, customEventHandler, canvas, gameData.clonePlayfield());
-
-                const vcsData = new VCSData(document.getElementById('vcs_data'), gameData);
-
-                document.getElementById('playfieldNormalMode').addEventListener('click', () => editor.setEditorMode(PlayfieldMode.NORMAL));
-                document.getElementById('playfieldMirrorMode').addEventListener('click', () => editor.setEditorMode(PlayfieldMode.REFLECTED));
-                document.getElementById('playfieldUndo').addEventListener('click', () => editor.undo());
-                document.getElementById('playfieldRedo').addEventListener('click', () => editor.redo());
-
-                document.getElementById('edit_mode_pf0').addEventListener('change', (e) => editor.setRegisterMode(0, e.target.value));
-                document.getElementById('edit_mode_pf1').addEventListener('change', (e) => editor.setRegisterMode(1, e.target.value));
-                document.getElementById('edit_mode_pf2').addEventListener('change', (e) => editor.setRegisterMode(2, e.target.value));
-
-                document.getElementById('updateData').addEventListener('click', () => vcsData.updateFromGameData());
-                document.getElementById('include_pf0').addEventListener('change', (e) => vcsData.setIncludeRegister(0, e.target.checked));
-                document.getElementById('include_pf1').addEventListener('change', (e) => vcsData.setIncludeRegister(1, e.target.checked));
-                document.getElementById('include_pf2').addEventListener('change', (e) => vcsData.setIncludeRegister(2, e.target.checked));
-
-                idsAndModes.forEach(([id, mode]) => document.getElementById(id).addEventListener('click', () => editor.setDrawMode(mode)));
-
-                editor.updateCanvas();
-            });
-
-            customEventHandler.addEventListener(EVENTS.EDITOR_STATE_CHANGED, (e) => {
-                [...document.getElementsByClassName('playfieldMode')].forEach((e) => e.classList.remove('selected'));
-                document
-                    .getElementById(e.detail.playfieldMode === PlayfieldMode.NORMAL ? 'playfieldNormalMode' : 'playfieldMirrorMode')
-                    .classList.add('selected');
-
-                [...document.getElementsByClassName('drawMode')].forEach((e) => e.classList.remove('selected'));
-                const selectedDrawModeId = idsAndModes.find(([id, mode]) => mode === e.detail.drawMode)?.[0];
-                document.getElementById(selectedDrawModeId)?.classList.add('selected');
-
-                document.getElementById('edit_mode_pf0').value = e.detail.registerModes[0];
-                document.getElementById('edit_mode_pf1').value = e.detail.registerModes[1];
-                document.getElementById('edit_mode_pf2').value = e.detail.registerModes[2];
-            });
-            customEventHandler.addEventListener(EVENTS.EDITOR_CONTENT_CHANGED, (e) => {
-                gameData.setData(e.detail.data)
-                palette.redrawAllGameData()
+                new Palette(document, customEventHandler, gameData);
+                new Editor(document, customEventHandler, gameData.clonePlayfield());
+                new VCSData(document, gameData);
             });
         </script>
     </head>
@@ -93,7 +37,7 @@
                   960px;  /* 192 * 5  (5 so that height * 4/3 is divible by 40)*/
                   1280px;  /*  960 * 4/3 */
                 -->
-                <canvas id="playfield" width="1280" height="960"> Your browser does not support HTML5 Canvas. </canvas>
+                <canvas id="editor_playfield" width="1280" height="960"> Your browser does not support HTML5 Canvas. </canvas>
             </div>
             <div class="Commands">
                 <h1>Simple VCS Playfield editor</h1>

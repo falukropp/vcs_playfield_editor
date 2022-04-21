@@ -2,8 +2,6 @@ python -m http.server --bind 0.0.0.0 9999
 
 # TODO:
 - Global Game object
-    - Display playfields in grid
-    - Add new playfield to palette
     - Select playfield in palette -> editor
     - Delete playfield in palette
     - Copy playfield in palette

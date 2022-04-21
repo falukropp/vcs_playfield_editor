@@ -3,10 +3,16 @@ export class VCSData {
     #gameData;
     #textarea;
 
-    constructor(textarea, gameData) {
-        this.#textarea = textarea;
+    constructor(document, gameData) {
+        this.#textarea = document.getElementById('vcs_data');
         this.#gameData = gameData;
         this.#includeRegisters = Array(3).fill(true);
+
+        document.getElementById('updateData').addEventListener('click', () => this.updateFromGameData());
+        document.getElementById('include_pf0').addEventListener('change', (e) => this.setIncludeRegister(0, e.target.checked));
+        document.getElementById('include_pf1').addEventListener('change', (e) => this.setIncludeRegister(1, e.target.checked));
+        document.getElementById('include_pf2').addEventListener('change', (e) => this.setIncludeRegister(2, e.target.checked));
+
     }
 
     setIncludeRegister(register, include) {

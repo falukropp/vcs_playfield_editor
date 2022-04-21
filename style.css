@@ -2,7 +2,7 @@ body {
     margin: 0px;
 }
 
-#playfield {
+#editor_playfield {
     background-color: white;
     max-width: 100%;
     max-height: 100%;
@@ -61,11 +61,20 @@ body {
 }
 
 #palette canvas {
-    margin: 3px;
     max-width: 40px;
     max-height: 32px;
+}
+
+#palette canvas:not(.selectedPlayField) {
+    margin: 3px;
+    border: 1px solid darkslategray;
+}
+
+#palette canvas.selectedPlayField {
+    margin: 1px;
     border: 3px solid black;
 }
+
 
 #add-new-playfield {
     display: grid;
