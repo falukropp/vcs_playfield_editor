@@ -14,6 +14,10 @@ export class GameData {
 
         this.addPlayfield(this.#playfieldHeight);
 
+        this.#eventHandler.addEventListener(COMMANDS.ADD_PLAYFIELD, (e) => {
+            this.addPlayfield(this.#playfieldHeight);
+        });
+
         this.#eventHandler.addEventListener(COMMANDS.CHANGE_PLAYFIELD_DATA, (e) => {
             this.setData(e.detail.data, e.detail.id);
         });
@@ -22,16 +26,17 @@ export class GameData {
             this.#setModeAndReqisterMode(e.detail.playfieldMode, e.detail.registerModes, e.detail.id)
         });
 
-        this.#eventHandler.addEventListener(COMMANDS.ADD_PLAYFIELD, (e) => {
-            this.addPlayfield(this.#playfieldHeight);
-        });
+        this.#eventHandler.addEventListener(COMMANDS.SELECT_PLAYFIELD, (e) => {
+            this.currentlySelected = e.detail.id
+        });        
+
     }
 
     addPlayfield(height) {
         const newPlayField = new Playfield(height);
         this.#palette.push(newPlayField);
-        if (!this.#currentlySelected) {
-            this.#currentlySelected = newPlayField.id;
+        if (this.#currentlySelected === undefined) {
+            this.currentlySelected = newPlayField.id;
         }
         this.#eventHandler.sendPlayfieldAdded(newPlayField.id, this.#palette.length - 1);
     }
@@ -49,6 +54,7 @@ export class GameData {
     set currentlySelected(id) {
         if (this.#palette.some((p) => p.id === id)) {
             this.#currentlySelected = id;
+            this.#eventHandler.sendPlayFieldSelected(id);
         }
     }
 

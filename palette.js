@@ -17,16 +17,14 @@ export class Palette {
         this.#gameData = gameData;
         this.#eventHandler = eventHandler;
         this.redrawAllGameData();
+        this.#setSelectedCanvas(this.#gameData.currentlySelected)
 
         this.#paletteArea.addEventListener('click', (e) => {
             const target = e.target;
             if (target.nodeName !== 'CANVAS') return;
-            const targetPlayfieldId = target.dataset.playfieldId;
-            if (targetPlayfieldId === gameData.currentlySelected) return;
-
-            [...document.getElementsByClassName('selectedPlayField')].forEach((e) => e.classList.remove('selectedPlayField'));
-            gameData.currentlySelected = targetPlayfieldId;
-            target.classList.add('selectedPlayField');
+            const targetPlayfieldId = parseInt(target.dataset.playfieldid);
+            if (targetPlayfieldId === this.#gameData.currentlySelected) return;
+            this.#eventHandler.sendSelectPlayField(targetPlayfieldId);
         });
 
         document.getElementById('add-new-playfield').addEventListener('click', () => {
@@ -37,9 +35,21 @@ export class Palette {
             this.redrawGameData(e.detail.id);
         });
 
+        this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_SELECTED, (e) => {
+            this.#setSelectedCanvas(e.detail.id)
+        });
+
         this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_ADDED, (e) => {
             this.#addNewPlayField(e.detail.id);
         });
+    }
+
+    #setSelectedCanvas(id) {
+        [...document.getElementsByClassName('selectedPlayField')].forEach((e) => e.classList.remove('selectedPlayField'));
+        const target = document.querySelector(`canvas[data-playfieldid='${id}']`)
+        if (target) {
+            target.classList.add('selectedPlayField');
+        }
     }
 
     redrawGameData(id) {
@@ -53,7 +63,7 @@ export class Palette {
     #addNewPlayField(playFieldId) {
         this.#addNewPlayfieldButton.insertAdjacentHTML(
             'beforeBegin',
-            `<canvas width="${this.#canvasWidth}" height="${this.#canvasHeight}" data-playfieldId="${playFieldId}"></canvas>`
+            `<canvas width="${this.#canvasWidth}" height="${this.#canvasHeight}" data-playfieldid="${playFieldId}"></canvas>`
         );
     }
 
@@ -74,15 +84,6 @@ export class Palette {
         for (let canvasIdx = 0; canvasIdx < numberOfPaletteEntries; ++canvasIdx) {
             this.#updateCanvas(paletteEntries[canvasIdx], canvases[canvasIdx]);
         }
-
-        /*
-        Handle removals elsewhere.
-        } else if (paletteEntries < currentNumberOfCanvases) {
-            for (const childIdx = paletteEntries; childIdx < currentNumberOfCanvases; ++childIdx) {
-                this.#paletteArea.removeChild(currentCanvases[childIdx])
-            }
-        }
-        */
     }
 
     removePlayfield(idx) {}
