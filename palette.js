@@ -1,8 +1,7 @@
 import { EVENTS } from './custom_event_handler.js';
 
 export class Palette {
-    #paletteArea;
-    #addNewPlayfieldButton;
+    #palettePlayfieldsArea;
 
     #gameData;
     #eventHandler;
@@ -11,15 +10,14 @@ export class Palette {
     #canvasHeight = 32;
 
     constructor(document, eventHandler, gameData) {
-        this.#paletteArea = document.getElementById('palette');
-        this.#addNewPlayfieldButton = document.getElementById('add-new-playfield');
+        this.#palettePlayfieldsArea = document.getElementById('palette-playfields');
 
         this.#gameData = gameData;
         this.#eventHandler = eventHandler;
         this.redrawAllGameData();
         this.#setSelectedCanvas(this.#gameData.currentlySelected)
 
-        this.#paletteArea.addEventListener('click', (e) => {
+        this.#palettePlayfieldsArea.addEventListener('click', (e) => {
             const target = e.target;
             if (target.nodeName !== 'CANVAS') return;
             const targetPlayfieldId = parseInt(target.dataset.playfieldid);
@@ -31,6 +29,15 @@ export class Palette {
             this.#eventHandler.sendAddPlayField();
         });
 
+        document.getElementById('delete-playfield').addEventListener('click', () => {
+            this.#eventHandler.deletePlayField();
+        });
+
+        document.getElementById('copy-playfield').addEventListener('click', () => {
+            this.#eventHandler.sendAddPlayField(this.#gameData.currentlySelected);
+        });
+
+    
         this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_DATA_CHANGED, (e) => {
             this.redrawGameData(e.detail.id);
         });
@@ -55,23 +62,24 @@ export class Palette {
     redrawGameData(id) {
         const idx = this.#gameData.getIdxOfId(id);
         if (idx !== -1) {
-            const canvases = this.#paletteArea.getElementsByTagName('canvas');
+            const canvases = this.#palettePlayfieldsArea.getElementsByTagName('canvas');
             this.#updateCanvas(this.#gameData.getPaletteDataAtIdx(idx), canvases[idx]);
         }
     }
 
     #addNewPlayField(playFieldId) {
-        this.#addNewPlayfieldButton.insertAdjacentHTML(
-            'beforeBegin',
+        this.#palettePlayfieldsArea.insertAdjacentHTML(
+            'beforeEnd',
             `<canvas width="${this.#canvasWidth}" height="${this.#canvasHeight}" data-playfieldid="${playFieldId}"></canvas>`
         );
+        this.redrawGameData(playFieldId);
     }
 
     redrawAllGameData() {
         const paletteEntries = this.#gameData.getAllPaletteData();
         const numberOfPaletteEntries = paletteEntries.length;
 
-        const canvases = this.#paletteArea.getElementsByTagName('canvas');
+        const canvases = this.#palettePlayfieldsArea.getElementsByTagName('canvas');
         const currentNumberOfCanvases = canvases.length;
 
         if (numberOfPaletteEntries > currentNumberOfCanvases) {

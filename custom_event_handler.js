@@ -1,5 +1,6 @@
 export const COMMANDS = {    
     ADD_PLAYFIELD: 'ADD_PLAYFIELD',
+    DELETE_PLAYFIELD: 'DELETE_PLAYFIELD',
     CHANGE_PLAYFIELD_DATA: 'CHANGE_PLAYFIELD_DATA',
     CHANGE_PLAYFIELD_STATE: 'CHANGE_PLAYFIELD_STATE',
     SELECT_PLAYFIELD: 'SELECT_PLAYFIELD',
@@ -8,6 +9,7 @@ export const COMMANDS = {
 
 export const EVENTS = {    
     PLAYFIELD_ADDED: 'PLAYFIELD_ADDED',
+    PLAYFIELD_DELETED: 'PLAYFIELD_DELETED',
     PLAYFIELD_STATE_CHANGED: 'PLAYFIELD_STATE_CHANGED',
     PLAYFIELD_DATA_CHANGED: 'PLAYFIELD_DATA_CHANGED',
     PLAYFIELD_SELECTED: 'PLAYFIELD_SELECTED',
@@ -26,6 +28,10 @@ export class CustomEventHandler {
         this.#eventTarget.addEventListener(event, fn);
     }
 
+    sendDeletePlayField(id) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.DELETE_PLAYFIELD, {detail : {id}}));
+    }
+
     sendSelectPlayField(id) {
         this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.SELECT_PLAYFIELD, {detail : {id}}));
     }
@@ -34,8 +40,8 @@ export class CustomEventHandler {
         this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_SELECTED, {detail : {id}}));
     }
 
-    sendAddPlayField() {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_PLAYFIELD));
+    sendAddPlayField(id) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_PLAYFIELD, {detail : {id}}));
     }
     
     sendPlayfieldAdded(id, idx) {

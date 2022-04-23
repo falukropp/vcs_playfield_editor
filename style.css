@@ -53,35 +53,43 @@ body {
 }
 
 #palette {
-    grid-area: Palette;
+    grid-area: Palette;    
+    display: flex;
+    flex-direction: row;
+}
+
+#palette-commands {
+    flex: 0 0 4rem;
+}
+
+#palette-playfields {
+    flex: 1;
     display: flex;
     flex-wrap: wrap;
     align-content: start;
     overflow-y: scroll;
 }
 
-#palette canvas {
+#palette-playfields canvas {
     max-width: 40px;
     max-height: 32px;
 }
 
-#palette canvas:not(.selectedPlayField) {
+#palette-playfields canvas:not(.selectedPlayField) {
     margin: 3px;
     border: 1px solid darkslategray;
 }
 
-#palette canvas.selectedPlayField {
+#palette-playfields canvas.selectedPlayField {
     margin: 1px;
     border: 3px solid black;
 }
 
 
-#add-new-playfield {
-    display: grid;
-    place-items: center;
+#palette-commands button {
     margin: 3px;
-    width: 46px;
-    height: 38px;
+    width: calc(100% - 6px);
+    height: 2rem;
 }
 
 button.selected {

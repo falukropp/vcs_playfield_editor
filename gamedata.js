@@ -15,7 +15,11 @@ export class GameData {
         this.addPlayfield(this.#playfieldHeight);
 
         this.#eventHandler.addEventListener(COMMANDS.ADD_PLAYFIELD, (e) => {
-            this.addPlayfield(this.#playfieldHeight);
+            this.addPlayfield(this.#playfieldHeight, e.detail.id);
+        });
+
+        this.#eventHandler.addEventListener(COMMANDS.COPY_PLAYFIELD, (e) => {
+            this.addPlayfield(this.#playfieldHeight, e.detail.id);
         });
 
         this.#eventHandler.addEventListener(COMMANDS.CHANGE_PLAYFIELD_DATA, (e) => {
@@ -23,17 +27,17 @@ export class GameData {
         });
 
         this.#eventHandler.addEventListener(COMMANDS.CHANGE_PLAYFIELD_STATE, (e) => {
-            this.#setModeAndReqisterMode(e.detail.playfieldMode, e.detail.registerModes, e.detail.id)
+            this.#setModeAndReqisterMode(e.detail.playfieldMode, e.detail.registerModes, e.detail.id);
         });
 
         this.#eventHandler.addEventListener(COMMANDS.SELECT_PLAYFIELD, (e) => {
-            this.currentlySelected = e.detail.id
-        });        
-
+            this.currentlySelected = e.detail.id;
+        });
     }
 
-    addPlayfield(height) {
-        const newPlayField = new Playfield(height);
+    addPlayfield(height, id) {
+        const newPlayField = id === undefined ? new Playfield(height) : this.#getPlayField(id)?.copy();
+        if (!newPlayField) return;
         this.#palette.push(newPlayField);
         if (this.#currentlySelected === undefined) {
             this.currentlySelected = newPlayField.id;

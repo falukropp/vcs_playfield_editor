@@ -92,12 +92,18 @@
                 </div>
             </div>
             <div id="palette">
-                <!-- 
-                    40 * 32 is not quit 4:3 aspect ratio, but should be close enough. 
+                <div id="palette-commands">
+                    <button id="delete-playfield">Delete</button>
+                    <button id="copy-playfield">Copy</button>
+                    <button id="add-new-playfield">+</button>
+                </div>
+                <div id="palette-playfields">
+                    <!-- 
+                    40 * 32 is not quite 4:3 aspect ratio, but should be close enough. 
                     The playfields are 40*16 vcr_pixels big, so they map to 1*2 pixels
-                <canvas  width="40" height="32"></canvas>
-                -->
-                <div id="add-new-playfield"><button>+</button></div>
+                    <canvas  width="40" height="32"></canvas>
+                    -->
+                </div>
             </div>
             <div class="Map">Map</div>
         </div>
