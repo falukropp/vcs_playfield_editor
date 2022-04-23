@@ -18,8 +18,8 @@ export class GameData {
             this.addPlayfield(this.#playfieldHeight, e.detail.id);
         });
 
-        this.#eventHandler.addEventListener(COMMANDS.COPY_PLAYFIELD, (e) => {
-            this.addPlayfield(this.#playfieldHeight, e.detail.id);
+        this.#eventHandler.addEventListener(COMMANDS.DELETE_PLAYFIELD, (e) => {
+            this.deletePlayfield(e.detail.id);
         });
 
         this.#eventHandler.addEventListener(COMMANDS.CHANGE_PLAYFIELD_DATA, (e) => {
@@ -45,10 +45,18 @@ export class GameData {
         this.#eventHandler.sendPlayfieldAdded(newPlayField.id, this.#palette.length - 1);
     }
 
-    removePlayField(id) {
+    deletePlayfield(id) {
+        if (this.#palette.length <= 1) return;
+
         this.#palette = this.#palette.filter((p) => p.id !== id);
         this.#map = this.#map.filter((mapId) => mapId !== idx);
-        if (this.#currentlySelected === id) this.#currentlySelected = undefined;
+
+        this.#eventHandler.sendPlayFieldDeleted(id);
+        
+        if (this.#currentlySelected === id) {
+            this.#currentlySelected = this.#palette[0].id;
+            this.#eventHandler.sendPlayFieldSelected(this.#currentlySelected);
+        }
     }
 
     get currentlySelected() {

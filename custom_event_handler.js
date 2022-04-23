@@ -32,6 +32,10 @@ export class CustomEventHandler {
         this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.DELETE_PLAYFIELD, {detail : {id}}));
     }
 
+    sendPlayFieldDeleted(id) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_DELETED, {detail : {id}}));
+    }
+
     sendSelectPlayField(id) {
         this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.SELECT_PLAYFIELD, {detail : {id}}));
     }

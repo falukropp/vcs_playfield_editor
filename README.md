@@ -1,10 +1,6 @@
 python -m http.server --bind 0.0.0.0 9999
 
 # TODO:
-- Global Game object
-    - Delete playfield in palette
-    - Copy playfield in palette
-        -> vcs-data
 - Editor
     - Copy/paste
 - Map - editor

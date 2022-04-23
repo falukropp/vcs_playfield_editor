@@ -15,7 +15,7 @@ export class Palette {
         this.#gameData = gameData;
         this.#eventHandler = eventHandler;
         this.redrawAllGameData();
-        this.#setSelectedCanvas(this.#gameData.currentlySelected)
+        this.#setSelectedCanvas(this.#gameData.currentlySelected);
 
         this.#palettePlayfieldsArea.addEventListener('click', (e) => {
             const target = e.target;
@@ -30,20 +30,23 @@ export class Palette {
         });
 
         document.getElementById('delete-playfield').addEventListener('click', () => {
-            this.#eventHandler.deletePlayField();
+            this.#eventHandler.sendDeletePlayField(this.#gameData.currentlySelected);
         });
 
         document.getElementById('copy-playfield').addEventListener('click', () => {
             this.#eventHandler.sendAddPlayField(this.#gameData.currentlySelected);
         });
 
-    
         this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_DATA_CHANGED, (e) => {
             this.redrawGameData(e.detail.id);
         });
 
         this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_SELECTED, (e) => {
-            this.#setSelectedCanvas(e.detail.id)
+            this.#setSelectedCanvas(e.detail.id);
+        });
+
+        this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_DELETED, (e) => {
+            this.#deletePlayfield(e.detail.id);
         });
 
         this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_ADDED, (e) => {
@@ -53,7 +56,7 @@ export class Palette {
 
     #setSelectedCanvas(id) {
         [...document.getElementsByClassName('selectedPlayField')].forEach((e) => e.classList.remove('selectedPlayField'));
-        const target = document.querySelector(`canvas[data-playfieldid='${id}']`)
+        const target = document.querySelector(`canvas[data-playfieldid='${id}']`);
         if (target) {
             target.classList.add('selectedPlayField');
         }
@@ -94,7 +97,12 @@ export class Palette {
         }
     }
 
-    removePlayfield(idx) {}
+    #deletePlayfield(id) {
+        const playfieldToRemove = document.querySelector(`canvas[data-playfieldid='${id}']`);
+        if (playfieldToRemove) {
+            playfieldToRemove.parentNode.removeChild(playfieldToRemove);
+        }
+    }
 
     #updateCanvas(data, canvas) {
         const context = canvas.getContext('2d');
