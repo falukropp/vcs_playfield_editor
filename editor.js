@@ -1,7 +1,6 @@
 import { EVENTS } from './custom_event_handler.js';
 import { PlayfieldMode } from './playfield.js';
 
-
 export const DrawMode = {
     SCRIBBLE: 'SCRIBBLE',
     LINE: 'LINE',
@@ -185,23 +184,26 @@ const idsAndModes = [
 
 export class Editor {
     #undos;
-    #currentUndoLevel;
+    #currentUndoLevels;
     #drawMode;
     #editorPlayfield;
+    #eventHandler;
+    #gameData;
 
-    constructor(document, eventHandler, initialPlayfield) {
+    constructor(document, eventHandler, gameData) {
         this.document = document;
-        this.eventHandler = eventHandler;
-        this.canvas = document.getElementById('editor_playfield');
-        this.#editorPlayfield = initialPlayfield.clone();
-        this.setDrawMode(DrawMode.SCRIBBLE)
+        this.#eventHandler = eventHandler;
+        this.#gameData = gameData;
+
         this.#undos = new Map(); // <number, Playfield[]>
-        this.#currentUndoLevel = 0;
+        this.#currentUndoLevels = new Map(); // <number, number>
 
-        this.#pushUndo();
+        this.canvas = document.getElementById('editor_playfield');
+        this.#setSelectedPlayfield();
+        this.setDrawMode(DrawMode.SCRIBBLE);
 
-        this.canvasRowsPerVcsPixel = this.canvas.height / initialPlayfield.height;
-        this.canvasColumnsPerVcsPixel = this.canvas.width / initialPlayfield.width;
+        this.canvasRowsPerVcsPixel = this.canvas.height / this.#editorPlayfield.height;
+        this.canvasColumnsPerVcsPixel = this.canvas.width / this.#editorPlayfield.width;
 
         this.mouseDownHandler = (e) => this.mouseDown(e);
         this.mouseMoveHandler = (e) => this.mouseMove(e);
@@ -210,15 +212,13 @@ export class Editor {
         this.canvas.oncontextmenu = () => false;
         this.canvas.addEventListener('mousedown', this.mouseDownHandler);
 
-        eventHandler.addEventListener(EVENTS.PLAYFIELD_STATE_CHANGED, (e) => {
-            [...document.getElementsByClassName('playfieldMode')].forEach((e) => e.classList.remove('selected'));
-            document.getElementById(e.detail.playfieldMode === PlayfieldMode.NORMAL ? 'playfieldNormalMode' : 'playfieldMirrorMode').classList.add('selected');
-
-            document.getElementById('edit_mode_pf0').value = e.detail.registerModes[0];
-            document.getElementById('edit_mode_pf1').value = e.detail.registerModes[1];
-            document.getElementById('edit_mode_pf2').value = e.detail.registerModes[2];
+        this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_STATE_CHANGED, (e) => {
+            this.#setGuiState(e.detail.playfieldMode, e.detail.registerModes);
         });
-        this.#handlePlayfieldStateChanges();
+
+        this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_SELECTED, (e) => {
+            this.#setSelectedPlayfield(e.detail.id);
+        });
 
         document.getElementById('playfieldNormalMode').addEventListener('click', () => this.setEditorMode(PlayfieldMode.NORMAL));
         document.getElementById('playfieldMirrorMode').addEventListener('click', () => this.setEditorMode(PlayfieldMode.REFLECTED));
@@ -255,6 +255,34 @@ export class Editor {
         }
     }
 
+    #setGuiState(playfieldMode, registerModes) {
+        [...document.getElementsByClassName('playfieldMode')].forEach((e) => e.classList.remove('selected'));
+        document.getElementById(playfieldMode === PlayfieldMode.NORMAL ? 'playfieldNormalMode' : 'playfieldMirrorMode').classList.add('selected');
+
+        document.getElementById('edit_mode_pf0').value = registerModes[0];
+        document.getElementById('edit_mode_pf1').value = registerModes[1];
+        document.getElementById('edit_mode_pf2').value = registerModes[2];
+    }
+
+    #setSelectedPlayfield(id) {
+        this.#editorPlayfield = this.#gameData.clonePlayfield(id);
+        if (!this.#undos.get(this.#editorPlayfield.id)) {
+            this.#pushUndo();
+        }
+        this.updateCanvasFromEditorPlayfield();
+        this.#setGuiState(this.#editorPlayfield.mode, this.#editorPlayfield.getRegisterModes());
+    }
+
+    #getCurrentUndoLevel() {
+        const currentId = this.#editorPlayfield.id;
+        return this.#currentUndoLevels.get(currentId) ?? 0;
+    }
+
+    #setCurrentUndoLevel(level) {
+        const currentId = this.#editorPlayfield.id;
+        return this.#currentUndoLevels.set(currentId, level);
+    }
+
     setDrawMode(newMode) {
         this.#drawMode = newMode;
 
@@ -264,21 +292,21 @@ export class Editor {
     }
 
     #pushUndo() {
-        const undosForCurrentPlayfield = this.#undos.get(this.#editorPlayfield.id)?.slice(0, this.#currentUndoLevel + 1) ?? [];
+        const undosForCurrentPlayfield = this.#undos.get(this.#editorPlayfield.id)?.slice(0, this.#getCurrentUndoLevel() + 1) ?? [];
         undosForCurrentPlayfield.push(this.#editorPlayfield.clone());
-        this.#currentUndoLevel = undosForCurrentPlayfield.length - 1;
+        this.#setCurrentUndoLevel(undosForCurrentPlayfield.length - 1);
         this.#undos.set(this.#editorPlayfield.id, undosForCurrentPlayfield);
     }
 
     #handlePlayfieldStateChanges() {
         const registerModes = this.#editorPlayfield.getRegisterModes();
         const playfieldMode = this.#editorPlayfield.mode;
-        this.eventHandler.sendChangePlayfieldState(this.#editorPlayfield.id, registerModes, playfieldMode);
-        this.eventHandler.sendChangePlayfieldData(this.#editorPlayfield.id, this.#editorPlayfield.data);
+        this.#eventHandler.sendChangePlayfieldState(this.#editorPlayfield.id, registerModes, playfieldMode);
+        this.#eventHandler.sendChangePlayfieldData(this.#editorPlayfield.id, this.#editorPlayfield.data);
     }
 
     #getPlayfieldFromUndo() {
-        return this.#undos.get(this.#editorPlayfield.id)[this.#currentUndoLevel];
+        return this.#undos.get(this.#editorPlayfield.id)[this.#getCurrentUndoLevel()];
     }
 
     #setPlayfieldFromUndo() {
@@ -288,22 +316,24 @@ export class Editor {
         this.#editorPlayfield.data = oldPlayfield.data;
         this.#editorPlayfield.setRegisterModes(oldPlayfield.getRegisterModes());
 
-        this.eventHandler.sendChangePlayfieldData(this.#editorPlayfield.id, this.#editorPlayfield.data);
+        this.#eventHandler.sendChangePlayfieldData(this.#editorPlayfield.id, this.#editorPlayfield.data);
 
         this.#handlePlayfieldStateChanges();
         this.updateCanvasFromEditorPlayfield();
     }
 
     undo() {
-        if (this.#currentUndoLevel > 0) {
-            this.#currentUndoLevel--;
+        const currentLevel = this.#getCurrentUndoLevel();
+        if (currentLevel > 0) {
+            this.#setCurrentUndoLevel(currentLevel - 1);
             this.#setPlayfieldFromUndo();
         }
     }
 
     redo() {
-        if (this.#currentUndoLevel < this.#undos.get(this.#editorPlayfield.id)?.length - 1) {
-            this.#currentUndoLevel++;
+        const currentLevel = this.#getCurrentUndoLevel();
+        if (currentLevel < this.#undos.get(this.#editorPlayfield.id)?.length - 1) {
+            this.#setCurrentUndoLevel(currentLevel + 1);
             this.#setPlayfieldFromUndo();
         }
     }
@@ -379,6 +409,6 @@ export class Editor {
         this.document.removeEventListener('mouseup', this.mouseUpHandler);
         this.#intialPlayfield = undefined;
         this.#pushUndo();
-        this.eventHandler.sendChangePlayfieldData(this.#editorPlayfield.id, this.#editorPlayfield.data);
+        this.#eventHandler.sendChangePlayfieldData(this.#editorPlayfield.id, this.#editorPlayfield.data);
     }
 }

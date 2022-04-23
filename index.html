@@ -23,7 +23,7 @@
 
             document.addEventListener('DOMContentLoaded', function () {
                 new Palette(document, customEventHandler, gameData);
-                new Editor(document, customEventHandler, gameData.clonePlayfield());
+                new Editor(document, customEventHandler, gameData);
                 new VCSData(document, gameData);
             });
         </script>
