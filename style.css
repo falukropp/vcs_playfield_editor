@@ -1,5 +1,11 @@
 body {
     margin: 0px;
+    font-family: "Courier New", Courier, monospace;
+}
+
+button {
+    font-family: "Courier New", Courier, monospace;
+    border-width: 2px;
 }
 
 #editor_playfield {
@@ -19,37 +25,69 @@ body {
     height: 100vh;
     width: 100vw;
     display: grid;
-    grid-template-columns: 0.5fr 0.1fr 1.4fr;
+    grid-template-columns: 1.4fr 0.1fr 0.5fr;
     grid-template-rows: 1fr 8fr 2fr;
     gap: 0px 0px;
     grid-template-areas:
-        'Data Map Commands'
-        'Data Map Editor'
-        'Data Map Palette';
+        'Commands Map Data'
+        'Editor Map Data'
+        'Palette Map Data';
 }
 
 .Editor {
     grid-area: Editor;
-    background-color: burlywood;
+    background-color: gray;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: auto;
 }
 
+.Editor canvas {
+    border-color: black;
+    border-style: solid;
+    border-width: 0px 1px;
+}
+
+
 .Commands {
     grid-area: Commands;
-    background-color: aqua;
+    background-color: lightgray;
 }
 
-.Data {
+.Commands h1 {
+    text-align: center;
+    text-shadow: 2px 2px 2px darkgray;
+}
+
+#data {
+    display: flex;
+    flex-direction: column;
     grid-area: Data;
-    background-color: aquamarine;
+    background-color: darkgray;
 }
 
-.Map {
+#map {
     grid-area: Map;
-    background-color: chocolate;
+    border-color: black;
+    border-style: solid;
+    border-width: 0px 1px;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(128, 128, 128, .15);
+}
+
+#map-header {
+    margin: 0px;
+    padding: 0px;
+    flex: 0 0 1.0rem;
+    text-align: center;
+    text-shadow: 2px 2px 2px darkgray
+}
+
+#map-playfields {
+    flex: 1;
+    box-shadow: inset 0 0 8px 2px rgba(128, 128, 128, .75);
 }
 
 #palette {
@@ -60,6 +98,8 @@ body {
 
 #palette-commands {
     flex: 0 0 4rem;
+    background-color: lightgray;
+    border-right: 1px black solid;
 }
 
 #palette-playfields {
@@ -68,11 +108,14 @@ body {
     flex-wrap: wrap;
     align-content: start;
     overflow-y: scroll;
+    box-shadow: inset 0 0 8px 2px rgba(128, 128, 128, .75);
+    background-color: rgba(128, 128, 128, .15);
 }
 
 #palette-playfields canvas {
     max-width: 40px;
     max-height: 32px;
+    box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, .25);
 }
 
 #palette-playfields canvas:not(.selectedPlayField) {

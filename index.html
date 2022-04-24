@@ -80,16 +80,14 @@
                     <button class="drawMode" id="drawModeEllipse">Ellipse</button>
                 </div>
             </div>
-            <div class="Data">
-                <div class="toolbar">
+            <div id="data">
+                <div id="data-commands">
                     <button id="updateData">Update data</button>
                     <label>PF0<input type="checkbox" id="include_pf0" name="include_pf0" value="include" checked="checked" /></label>
                     <label>PF1<input type="checkbox" id="include_pf1" name="include_pf1" value="include" checked="checked" /></label>
                     <label>PF2<input type="checkbox" id="include_pf2" name="include_pf2" value="include" checked="checked" /></label>
-                    <div>
-                        <textarea id="vcs_data" readonly cols="40" rows="50">...</textarea>
-                    </div>
                 </div>
+                <textarea id="vcs_data" readonly cols="40" rows="50">...</textarea>
             </div>
             <div id="palette">
                 <div id="palette-commands">
@@ -105,7 +103,10 @@
                     -->
                 </div>
             </div>
-            <div class="Map">Map</div>
+            <div id="map">
+                <h1 id="map-header">Map</h1>
+                <div id="map-playfields"></div>
+            </div>
         </div>
     </body>
 </html>
