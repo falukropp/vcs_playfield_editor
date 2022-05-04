@@ -5,6 +5,7 @@ export class GameData {
     #palette = [];
     #map = [];
     #currentlySelected;
+    #currentlySelectedMap;
     #eventHandler;
     #playfieldHeight;
 
@@ -16,6 +17,14 @@ export class GameData {
 
         this.#eventHandler.addEventListener(COMMANDS.ADD_PLAYFIELD, (e) => {
             this.addPlayfield(this.#playfieldHeight, e.detail.id);
+        });
+
+        this.#eventHandler.addEventListener(COMMANDS.ADD_TO_MAP, (e) => {
+            this.#addMap(e.detail.id, e.detail.idx);
+        });
+
+        this.#eventHandler.addEventListener(COMMANDS.DELETE_FROM_MAP, (e) => {
+            this.#deleteMap(e.detail.idx);
         });
 
         this.#eventHandler.addEventListener(COMMANDS.DELETE_PLAYFIELD, (e) => {
@@ -32,6 +41,10 @@ export class GameData {
 
         this.#eventHandler.addEventListener(COMMANDS.SELECT_PLAYFIELD, (e) => {
             this.currentlySelected = e.detail.id;
+        });
+
+        this.#eventHandler.addEventListener(COMMANDS.SELECT_MAP, (e) => {
+            this.currentlySelectMap = e.detail.idx;
         });
     }
 
@@ -52,7 +65,7 @@ export class GameData {
         this.#map = this.#map.filter((mapId) => mapId !== idx);
 
         this.#eventHandler.sendPlayFieldDeleted(id);
-        
+
         if (this.#currentlySelected === id) {
             this.#currentlySelected = this.#palette[0].id;
             this.#eventHandler.sendPlayFieldSelected(this.#currentlySelected);
@@ -118,10 +131,6 @@ export class GameData {
         this.#eventHandler.sendPlayfieldDataChanged(id, data);
     }
 
-    removeMap(idx) {
-        this.#map.splice(idx, 1);
-    }
-
     clonePlayfield(id = this.#currentlySelected) {
         return this.#getPlayField(id)?.clone();
     }
@@ -154,7 +163,34 @@ export class GameData {
         return this.#palette.length;
     }
 
+    get currentlySelectedMap() {
+        return this.#currentlySelectedMap;
+    }
+
+    set currentlySelectedMap(idx) {
+        if (idx < this.#map.length) {
+            this.#currentlySelectedMap = idx;
+            this.#eventHandler.sendMapSelected(idx);
+        }
+    }
+
+    #addMap(id, idx) {
+        if (this.#getPlayField(id)) {
+            this.#map.splice(idx ?? 0, 0, id);
+            this.#eventHandler.sendMapAdded(id, idx);
+        }
+    }
+
+    #deleteMap(idx) {
+        this.#map.splice(idx, 1);
+        this.#eventHandler.sendMapDeleted(idx);
+    }
+
     getMap() {
         return [...map];
+    }
+
+    getPlayfieldIdAtMapIdx(idx) {
+        return this.#map[idx];
     }
 }

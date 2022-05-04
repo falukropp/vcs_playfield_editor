@@ -1,13 +1,19 @@
 export const COMMANDS = {    
     ADD_PLAYFIELD: 'ADD_PLAYFIELD',
+    ADD_TO_MAP: 'ADD_TO_MAP',
     DELETE_PLAYFIELD: 'DELETE_PLAYFIELD',
+    DELETE_FROM_MAP: 'DELETE_FROM_MAP',
     CHANGE_PLAYFIELD_DATA: 'CHANGE_PLAYFIELD_DATA',
     CHANGE_PLAYFIELD_STATE: 'CHANGE_PLAYFIELD_STATE',
     SELECT_PLAYFIELD: 'SELECT_PLAYFIELD',
+    SELECT_MAP: 'SELECT_MAp',
 };
 
 
 export const EVENTS = {    
+    MAP_ADDED: 'MAP_ADDED',
+    MAP_DELETED: 'MAP_DELETED',
+    MAP_SELECTED: 'MAP_SELECTED',
     PLAYFIELD_ADDED: 'PLAYFIELD_ADDED',
     PLAYFIELD_DELETED: 'PLAYFIELD_DELETED',
     PLAYFIELD_STATE_CHANGED: 'PLAYFIELD_STATE_CHANGED',
@@ -28,6 +34,31 @@ export class CustomEventHandler {
         this.#eventTarget.addEventListener(event, fn);
     }
 
+    sendAddToMap(id, idx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_TO_MAP, {detail : {id, idx}}));
+    }
+
+    sendDeleteFromMap(idx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.DELETE_FROM_MAP, {detail : {idx}}));
+    }
+
+    sendSelectMap(idx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.SELECT_MAP, {detail : {idx}}));
+    }
+
+    sendMapAdded(id, idx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_ADDED, {detail : {id, idx}}));
+    }
+
+    sendMapDeleted(idx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_DELETED, {detail : {idx}}));
+    }
+
+    sendMapSelected(idx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_SELECTED, {detail : {idx}}));
+    }
+
+
     sendDeletePlayField(id) {
         this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.DELETE_PLAYFIELD, {detail : {id}}));
     }
@@ -44,8 +75,8 @@ export class CustomEventHandler {
         this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_SELECTED, {detail : {id}}));
     }
 
-    sendAddPlayField(id) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_PLAYFIELD, {detail : {id}}));
+    sendAddPlayField() {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_PLAYFIELD, {detail : {}}));
     }
     
     sendPlayfieldAdded(id, idx) {
