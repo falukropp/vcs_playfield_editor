@@ -44,7 +44,7 @@ export class GameData {
         });
 
         this.#eventHandler.addEventListener(COMMANDS.SELECT_MAP, (e) => {
-            this.currentlySelectMap = e.detail.idx;
+            this.currentlySelectedMap = e.detail.idx;
         });
     }
 
@@ -187,10 +187,14 @@ export class GameData {
     }
 
     getMap() {
-        return [...map];
+        return [...this.#map];
     }
 
     getPlayfieldIdAtMapIdx(idx) {
         return this.#map[idx];
+    }
+
+    getMapLength() {
+        return this.#map.length;
     }
 }

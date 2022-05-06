@@ -11,6 +11,7 @@
             import { DrawMode, Editor } from './editor.js';
             import { VCSData } from './vcs_data.js';
             import { GameData } from './gamedata.js';
+            import { Map } from './map.js';
             import { Palette } from './palette.js';
             import { COMMANDS, EVENTS, CustomEventHandler } from './custom_event_handler.js';
 
@@ -25,6 +26,7 @@
                 new Palette(document, customEventHandler, gameData);
                 new Editor(document, customEventHandler, gameData);
                 new VCSData(document, gameData);
+                new Map(document, customEventHandler, gameData);
             });
         </script>
     </head>

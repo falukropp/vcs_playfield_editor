@@ -29,15 +29,15 @@ export class Map {
         });
 
         document.getElementById('remove-from-map').addEventListener('click', () => {
-            this.#eventHandler.sendRemoveFromMap(this.#gameData.currentlySelectedMap);
+            this.#eventHandler.sendDeleteFromMap(this.#gameData.currentlySelectedMap);
         });
 
         this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_DATA_CHANGED, (e) => {
-            this.redrawGameData(e.detail.id);
+            this.#redrawGameData(e.detail.id);
         });
 
         this.#eventHandler.addEventListener(EVENTS.MAP_ADDED, (e) => {
-            this.#addMap(e.detail.id, e.detail.ix);
+            this.#addMap(e.detail.id, e.detail.idx);
         });
 
         this.#eventHandler.addEventListener(EVENTS.MAP_SELECTED, (e) => {
@@ -49,11 +49,17 @@ export class Map {
         });
     }
 
+    #redrawGameData(id) {
+        this.#gameData.getMap().forEach((mapId, idx) => {
+            if (mapId === id) this.#redrawMapIdx(idx);
+        });
+    }
+
     #redrawMapIdx(idx) {
         const playFieldId = this.#gameData.getPlayfieldIdAtMapIdx(idx);
         const data = this.#gameData.getPaletteData(playFieldId);
 
-        const canvas = this.#mapPlayfieldsArea.getElementsByTagName('canvas').item(idx);
+        const canvas = this.#getCanvasAtIndex(idx);
         if (!canvas) return;
         const context = canvas.getContext('2d');
 
@@ -75,45 +81,62 @@ export class Map {
         }
     }
 
-    #appendCanvas() {
-        this.#palettePlayfieldsArea.insertAdjacentHTML('beforeEnd', `<canvas width="${this.#canvasWidth}" height="${this.#canvasHeight}"></canvas>`);
+    #getNewCanvasCode() {
+        return `<canvas width="${this.#canvasWidth}" height="${this.#canvasHeight}"></canvas>`;
+    }
+
+    #appendNewCanvas() {
+        this.#mapPlayfieldsArea.insertAdjacentHTML('beforeEnd', this.#getNewCanvasCode());
     }
 
     #redrawWholeMap() {
-        const map = this.#gameData.getMap();
-        const mapEntries = map.length;
+        const mapEntries = this.#gameData.getMapLength();
+        const currentNumberOfCanvases = this.#getCanvases().length;
 
-        const canvases = this.#mapPlayfieldsArea.getElementsByTagName('canvas');
-        const currentNumberOfCanvases = canvases.length;
-
-        for (let canvasIdx = 0; canvasIdx < numberOfPaletteEntries; ++canvasIdx) {
+        for (let canvasIdx = 0; canvasIdx < mapEntries; ++canvasIdx) {
             this.#redrawMapIdx(canvasIdx);
         }
 
-        if (numberOfPaletteEntries > currentNumberOfCanvases) {
-            for (let childIdx = currentNumberOfCanvases; childIdx < numberOfPaletteEntries; ++childIdx) {
-                this.#appendCanvas();
+        if (mapEntries > currentNumberOfCanvases) {
+            for (let childIdx = currentNumberOfCanvases; childIdx < mapEntries; ++childIdx) {
+                this.#appendNewCanvas();
                 this.#redrawMapIdx(childIdx);
             }
         }
     }
 
     #addMap(id, idx) {
-        if(!idx) {
-            this.#appendCanvas();
-            this.#redrawMapIdx();
-        }
-        const canvas = this.#mapPlayfieldsArea.getElementsByTagName('canvas').item(idx);
+        const canvas = this.#getCanvasAtIndex(idx);
+        let idxToRedraw;
         if (!canvas) {
-
+            this.#appendNewCanvas();
+            idxToRedraw = 0;
+        } else {
+            canvas.insertAdjacentHTML('beforebegin', this.#getNewCanvasCode());
+            idxToRedraw = idx;
         }
-        this.#redrawMapIdx(idx)
+        this.#redrawMapIdx(idxToRedraw);
+        this.#eventHandler.sendSelectMap(idxToRedraw);
+    }
+
+    // Returns undefined if idx undefined or out-of-bounds.
+    #getCanvasAtIndex(idx) {
+        return this.#getCanvases()[idx];
+    }
+
+    #getCanvases() {
+        return this.#mapPlayfieldsArea.getElementsByTagName('canvas');
     }
 
     #deleteMap(idx) {
-        const canvas = this.#mapPlayfieldsArea.getElementsByTagName('canvas').item(idx);
-        if(canvas) {
-            this.#mapPlayfieldsArea.remove(canvas);
+        const canvas = this.#getCanvasAtIndex(idx);
+        if (canvas) {
+            this.#mapPlayfieldsArea.removeChild(canvas);
         }
+    }
+
+    #selectMap(idx) {
+        [...this.#mapPlayfieldsArea.querySelectorAll('.selectedMap')].forEach((e) => e.classList.remove('selectedMap'));
+        this.#getCanvasAtIndex(idx)?.classList.add('selectedMap');
     }
 }
