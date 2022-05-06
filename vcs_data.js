@@ -26,13 +26,17 @@ export class VCSData {
     updateFromGameData() {
         let text = '';
         text += this.#gameData.getAllPaletteData().map(this.#updateFromPlayfield, this).join(`\n`)
-        // Do something with mapdata too.
+        text += '\n# Map\n'
+        text += this.#gameData.getMap().map(id => `#%` + this.#getPaddedByte(id)).join(`\n`)
 
         this.#textarea.value = text
     }
 
+    #getPaddedByte(num) {
+        return num.toString(2).padStart(8, '0');
+    }
+
     #updateFromPlayfield(playfieldData, idx) {
-        const getPaddedByte = (num) => num.toString(2).padStart(8, '0');
         let text = `# room ${idx}\n`;
 
         playfieldData.forEach((row) => {
@@ -56,7 +60,7 @@ export class VCSData {
             const rowData = [];
             for (let i = 0; i <= 2; ++i) {
                 if (this.#includeRegisters[i]) {
-                    rowData.push(`#%` + getPaddedByte(PF[i]));
+                    rowData.push(`#%` + this.#getPaddedByte(PF[i]));
                 }
             }
 
