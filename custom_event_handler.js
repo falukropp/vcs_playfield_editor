@@ -75,8 +75,8 @@ export class CustomEventHandler {
         this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_SELECTED, {detail : {id}}));
     }
 
-    sendAddPlayField() {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_PLAYFIELD, {detail : {}}));
+    sendAddPlayField(id) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_PLAYFIELD, {detail : {id}}));
     }
     
     sendPlayfieldAdded(id, idx) {
