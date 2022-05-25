@@ -28,8 +28,24 @@ export class Map {
             this.#eventHandler.sendAddToMap(this.#gameData.currentlySelected, this.#gameData.currentlySelectedMap);
         });
 
-        document.getElementById('remove-from-map').addEventListener('click', () => {
+        document.getElementById('delete-from-map').addEventListener('click', () => {
             this.#eventHandler.sendDeleteFromMap(this.#gameData.currentlySelectedMap);
+        });
+
+        document.getElementById('move-map-up').addEventListener('click', () => {
+            const mapIdx = this.#gameData.currentlySelectedMap;
+            if (mapIdx > 0) {
+                this.#eventHandler.sendMoveMap(mapIdx, mapIdx - 1);
+                this.#eventHandler.sendSelectMap(mapIdx - 1);
+            }
+        });
+
+        document.getElementById('move-map-down').addEventListener('click', () => {
+            const mapIdx = this.#gameData.currentlySelectedMap;
+            if (mapIdx < this.#gameData.getMapLength() - 1) {
+                this.#eventHandler.sendMoveMap(mapIdx, mapIdx + 1);
+                this.#eventHandler.sendSelectMap(mapIdx + 1);
+            }
         });
 
         this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_DATA_CHANGED, (e) => {
@@ -38,6 +54,10 @@ export class Map {
 
         this.#eventHandler.addEventListener(EVENTS.MAP_ADDED, (e) => {
             this.#addMap(e.detail.id, e.detail.idx);
+        });
+
+        this.#eventHandler.addEventListener(EVENTS.MAP_MOVED, (e) => {
+            this.#moveMap(e.detail.fromIdx, e.detail.toIdx);
         });
 
         this.#eventHandler.addEventListener(EVENTS.MAP_SELECTED, (e) => {
@@ -132,6 +152,15 @@ export class Map {
         const canvas = this.#getCanvasAtIndex(idx);
         if (canvas) {
             this.#mapPlayfieldsArea.removeChild(canvas);
+        }
+    }
+
+    #moveMap(fromIdx, toIdx) {
+        const canvases = this.#getCanvases();
+        if (fromIdx > toIdx) {
+            canvases[toIdx].insertAdjacentElement('beforebegin', canvases[fromIdx]);
+        } else {
+            canvases[toIdx].insertAdjacentElement('afterend', canvases[fromIdx]);
         }
     }
 

@@ -27,6 +27,10 @@ export class GameData {
             this.#deleteMap(e.detail.idx);
         });
 
+        this.#eventHandler.addEventListener(COMMANDS.MOVE_MAP, (e) => {
+            this.#moveMap(e.detail.fromIdx, e.detail.toIdx);
+        });
+
         this.#eventHandler.addEventListener(COMMANDS.DELETE_PLAYFIELD, (e) => {
             this.deletePlayfield(e.detail.id);
         });
@@ -179,6 +183,19 @@ export class GameData {
             this.#map.splice(idx ?? 0, 0, id);
             this.#eventHandler.sendMapAdded(id, idx);
         }
+    }
+
+    #moveMap(fromIdx, toIdx) {
+        if (fromIdx === toIdx) return;
+        // Disallow these edge-cases. Don't want to be dependent on implementation details for handling them.
+        if (fromIdx < 0 || fromIdx >= this.#map.length) return;
+        if (toIdx < 0 || toIdx >= this.#map.length) return;
+
+        const id = this.#map[fromIdx];
+        this.#map.splice(fromIdx, 1);
+        this.#map.splice(toIdx, 0, id);
+
+        this.#eventHandler.sendMapMoved(fromIdx, toIdx);
     }
 
     #deleteMap(idx) {

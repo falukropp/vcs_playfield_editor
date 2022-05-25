@@ -1,18 +1,20 @@
 export const COMMANDS = {    
     ADD_PLAYFIELD: 'ADD_PLAYFIELD',
     ADD_TO_MAP: 'ADD_TO_MAP',
-    DELETE_PLAYFIELD: 'DELETE_PLAYFIELD',
-    DELETE_FROM_MAP: 'DELETE_FROM_MAP',
     CHANGE_PLAYFIELD_DATA: 'CHANGE_PLAYFIELD_DATA',
     CHANGE_PLAYFIELD_STATE: 'CHANGE_PLAYFIELD_STATE',
+    DELETE_PLAYFIELD: 'DELETE_PLAYFIELD',
+    DELETE_FROM_MAP: 'DELETE_FROM_MAP',
+    MOVE_MAP: 'MOVE_MAP',
     SELECT_PLAYFIELD: 'SELECT_PLAYFIELD',
-    SELECT_MAP: 'SELECT_MAp',
+    SELECT_MAP: 'SELECT_MAP',
 };
 
 
 export const EVENTS = {    
     MAP_ADDED: 'MAP_ADDED',
     MAP_DELETED: 'MAP_DELETED',
+    MAP_MOVED: 'MAP_MOVED',
     MAP_SELECTED: 'MAP_SELECTED',
     PLAYFIELD_ADDED: 'PLAYFIELD_ADDED',
     PLAYFIELD_DELETED: 'PLAYFIELD_DELETED',
@@ -32,6 +34,14 @@ export class CustomEventHandler {
     addEventListener(event, fn) {
         // could maybe check if event is correct, etc.
         this.#eventTarget.addEventListener(event, fn);
+    }
+
+    sendMoveMap(fromIdx, toIdx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.MOVE_MAP, {detail : {fromIdx, toIdx}}));
+    }
+
+    sendMapMoved(fromIdx, toIdx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_MOVED, {detail : {fromIdx, toIdx}}));
     }
 
     sendAddToMap(id, idx) {
