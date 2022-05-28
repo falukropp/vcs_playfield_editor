@@ -67,6 +67,10 @@ export class Map {
         this.#eventHandler.addEventListener(EVENTS.MAP_DELETED, (e) => {
             this.#deleteMap(e.detail.idx);
         });
+
+        this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_DELETED, (e) => {
+            this.#deleteMapsWithPlayfieldId(e.detail.id);
+        });
     }
 
     #redrawGameData(id) {
@@ -101,12 +105,12 @@ export class Map {
         }
     }
 
-    #getNewCanvasCode() {
-        return `<canvas width="${this.#canvasWidth}" height="${this.#canvasHeight}"></canvas>`;
+    #getNewCanvasCode(playfieldId) {
+        return `<canvas width="${this.#canvasWidth}" height="${this.#canvasHeight}" data-mapplayfieldid="${playfieldId}"></canvas>`;
     }
 
-    #appendNewCanvas() {
-        this.#mapPlayfieldsArea.insertAdjacentHTML('beforeEnd', this.#getNewCanvasCode());
+    #appendNewCanvas(playfieldId) {
+        this.#mapPlayfieldsArea.insertAdjacentHTML('beforeEnd', this.#getNewCanvasCode(playfieldId));
     }
 
     #redrawWholeMap() {
@@ -119,7 +123,7 @@ export class Map {
 
         if (mapEntries > currentNumberOfCanvases) {
             for (let childIdx = currentNumberOfCanvases; childIdx < mapEntries; ++childIdx) {
-                this.#appendNewCanvas();
+                this.#appendNewCanvas(this.#gameData.getPlayfieldIdAtMapIdx(childIdx));
                 this.#redrawMapIdx(childIdx);
             }
         }
@@ -129,10 +133,10 @@ export class Map {
         const canvas = this.#getCanvasAtIndex(idx);
         let idxToRedraw;
         if (!canvas) {
-            this.#appendNewCanvas();
+            this.#appendNewCanvas(id);
             idxToRedraw = 0;
         } else {
-            canvas.insertAdjacentHTML('beforebegin', this.#getNewCanvasCode());
+            canvas.insertAdjacentHTML('beforebegin', this.#getNewCanvasCode(id));
             idxToRedraw = idx;
         }
         this.#redrawMapIdx(idxToRedraw);
@@ -153,6 +157,11 @@ export class Map {
         if (canvas) {
             this.#mapPlayfieldsArea.removeChild(canvas);
         }
+    }
+
+    #deleteMapsWithPlayfieldId(id) {
+        const toBeDeleted = this.#mapPlayfieldsArea.querySelectorAll(`canvas[data-mapplayfieldid='${id}']`);
+        toBeDeleted.forEach((e) => this.#mapPlayfieldsArea.removeChild(e));
     }
 
     #moveMap(fromIdx, toIdx) {

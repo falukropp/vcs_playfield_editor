@@ -66,7 +66,7 @@ export class GameData {
         if (this.#palette.length <= 1) return;
 
         this.#palette = this.#palette.filter((p) => p.id !== id);
-        this.#map = this.#map.filter((mapId) => mapId !== idx);
+        this.#map = this.#map.filter((mapId) => mapId !== id);
 
         this.#eventHandler.sendPlayFieldDeleted(id);
 
