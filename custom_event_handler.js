@@ -1,4 +1,4 @@
-export const COMMANDS = {    
+export const COMMANDS = {
     ADD_PLAYFIELD: 'ADD_PLAYFIELD',
     ADD_TO_MAP: 'ADD_TO_MAP',
     CHANGE_PLAYFIELD_DATA: 'CHANGE_PLAYFIELD_DATA',
@@ -10,8 +10,7 @@ export const COMMANDS = {
     SELECT_MAP: 'SELECT_MAP',
 };
 
-
-export const EVENTS = {    
+export const EVENTS = {
     MAP_ADDED: 'MAP_ADDED',
     MAP_DELETED: 'MAP_DELETED',
     MAP_MOVED: 'MAP_MOVED',
@@ -36,80 +35,88 @@ export class CustomEventHandler {
         this.#eventTarget.addEventListener(event, fn);
     }
 
-    sendMoveMap(fromIdx, toIdx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.MOVE_MAP, {detail : {fromIdx, toIdx}}));
+    addEventsListener(events, fn) {
+        events.forEach((event) => this.#eventTarget.addEventListener(event, fn));
     }
 
-    sendMapMoved(fromIdx, toIdx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_MOVED, {detail : {fromIdx, toIdx}}));
+    // -----------------------------------------------------------------------
+    // Helpers for commands
+    // -----------------------------------------------------------------------
+
+    sendAddPlayField(id) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_PLAYFIELD, { detail: { id } }));
     }
 
     sendAddToMap(id, idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_TO_MAP, {detail : {id, idx}}));
-    }
-
-    sendDeleteFromMap(idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.DELETE_FROM_MAP, {detail : {idx}}));
-    }
-
-    sendSelectMap(idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.SELECT_MAP, {detail : {idx}}));
-    }
-
-    sendMapAdded(id, idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_ADDED, {detail : {id, idx}}));
-    }
-
-    sendMapDeleted(idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_DELETED, {detail : {idx}}));
-    }
-
-    sendMapSelected(idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_SELECTED, {detail : {idx}}));
-    }
-
-
-    sendDeletePlayField(id) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.DELETE_PLAYFIELD, {detail : {id}}));
-    }
-
-    sendPlayFieldDeleted(id) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_DELETED, {detail : {id}}));
-    }
-
-    sendSelectPlayField(id) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.SELECT_PLAYFIELD, {detail : {id}}));
-    }
-
-    sendPlayFieldSelected(id) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_SELECTED, {detail : {id}}));
-    }
-
-    sendAddPlayField(id) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_PLAYFIELD, {detail : {id}}));
-    }
-    
-    sendPlayfieldAdded(id, idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_ADDED, {detail: {id, idx} }));
-    }
-    
-    sendPlayfieldAdded(id, idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_ADDED, {detail: {id, idx} }));
-    }
-    
-    sendChangePlayfieldState(id, registerModes, playfieldMode) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.CHANGE_PLAYFIELD_STATE, { detail: { id, registerModes, playfieldMode} }));
-    }
-
-    sendPlayfieldStateChanged(id, registerModes, playfieldMode) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_STATE_CHANGED, { detail: { id, registerModes, playfieldMode} }));
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_TO_MAP, { detail: { id, idx } }));
     }
 
     sendChangePlayfieldData(id, data) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.CHANGE_PLAYFIELD_DATA, { detail: {id, data} }));
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.CHANGE_PLAYFIELD_DATA, { detail: { id, data } }));
+    }
+
+    sendChangePlayfieldState(id, registerModes, playfieldMode) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.CHANGE_PLAYFIELD_STATE, { detail: { id, registerModes, playfieldMode } }));
+    }
+
+    sendDeletePlayField(id) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.DELETE_PLAYFIELD, { detail: { id } }));
+    }
+
+    sendDeleteFromMap(idx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.DELETE_FROM_MAP, { detail: { idx } }));
+    }
+
+    sendMoveMap(fromIdx, toIdx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.MOVE_MAP, { detail: { fromIdx, toIdx } }));
+    }
+
+    sendSelectMap(idx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.SELECT_MAP, { detail: { idx } }));
+    }
+
+    sendSelectPlayField(id) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.SELECT_PLAYFIELD, { detail: { id } }));
+    }
+
+    // -----------------------------------------------------------------------
+    // Helpers for events
+    // -----------------------------------------------------------------------
+
+
+    sendMapAdded(id, idx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_ADDED, { detail: { id, idx } }));
+    }
+
+    sendMapDeleted(idx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_DELETED, { detail: { idx } }));
+    }
+
+    sendMapMoved(fromIdx, toIdx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_MOVED, { detail: { fromIdx, toIdx } }));
+    }
+
+    sendMapSelected(idx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_SELECTED, { detail: { idx } }));
+    }
+
+    sendPlayfieldAdded(id, idx) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_ADDED, { detail: { id, idx } }));
+    }
+
+    sendPlayFieldDeleted(id) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_DELETED, { detail: { id } }));
+    }
+
+    sendPlayFieldSelected(id) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_SELECTED, { detail: { id } }));
+    }
+
+    sendPlayfieldStateChanged(id, registerModes, playfieldMode) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_STATE_CHANGED, { detail: { id, registerModes, playfieldMode } }));
     }
 
     sendPlayfieldDataChanged(id, data) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_DATA_CHANGED, { detail: {id, data} }));
+        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_DATA_CHANGED, { detail: { id, data } }));
     }
 }
