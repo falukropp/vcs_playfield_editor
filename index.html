@@ -14,12 +14,14 @@
             import { Map } from './map.js';
             import { Palette } from './palette.js';
             import { COMMANDS, EVENTS, CustomEventHandler } from './custom_event_handler.js';
+            import { StorageHandler } from './storage_handler.js';
 
             const customEventHandler = new CustomEventHandler(document);
 
             const vcsRows = 192;
             const scanLinesPerVcsRow = 12; // Should be maybe modifiable
             const vcsPlayfieldRows = vcsRows / scanLinesPerVcsRow;
+            const storage = new StorageHandler(customEventHandler);
             const gameData = new GameData(customEventHandler, vcsPlayfieldRows);
 
             document.addEventListener('DOMContentLoaded', function () {

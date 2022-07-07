@@ -11,49 +11,36 @@ export const PlayfieldRegisterMode = {
 
 export const PLAYFIELD_WIDTH = 40;
 
-let nextId = 0;
-
 export class Playfield {
     #data;
     #mode;
-    // TODO: Probably remove this? Must always be #data.length
     #height;
     #registerModes;
     #id;
 
-    constructor(height, mode = PlayfieldMode.NORMAL, data, registerModes) {
-        this.#id = nextId++;
+    constructor(id, height, mode = PlayfieldMode.NORMAL, data, registerModes) {
+        this.#id = id;
         if (registerModes && registerModes.length != 3) {
             throw new Error(`Weird registerModes! ${registerModes}`);
         }
-        if (data && data.length != height) {
-            throw new Error(`Weird data size, expected ${height}, was ${data.length}`);
-        }
 
-        this.#height = height;
         this.#mode = mode;
         this.#registerModes = registerModes ?? Array(3).fill(PlayfieldRegisterMode.DRAW);
 
-        this.#data = data ? this.#copyData(data) : this.#createEmptyData();
+        this.#data = data ? this.#copyData(data) : this.#createEmptyData(height);
+        this.#height = this.#data.length;
     }
 
-    copy() {
-        return new Playfield(this.#height, this.mode, this.data, this.getRegisterModes());
+    copy(id) {
+        return new Playfield(id ?? this.#id, this.#height, this.#mode, this.#data, this.getRegisterModes());
     }
-
-    clone() {
-        const copy = new Playfield(this.#height, this.mode, this.data, this.getRegisterModes());
-        copy.#id = this.#id
-        return copy
-    }
-
 
     get id() {
         return this.#id
     }
 
-    #createEmptyData() {
-        return Array(this.#height)
+    #createEmptyData(height) {
+        return Array(height)
             .fill()
             .map(() => Array(PLAYFIELD_WIDTH).fill(0));
     }

@@ -293,7 +293,7 @@ export class Editor {
 
     #pushUndo() {
         const undosForCurrentPlayfield = this.#undos.get(this.#editorPlayfield.id)?.slice(0, this.#getCurrentUndoLevel() + 1) ?? [];
-        undosForCurrentPlayfield.push(this.#editorPlayfield.clone());
+        undosForCurrentPlayfield.push(this.#editorPlayfield.copy());
         this.#setCurrentUndoLevel(undosForCurrentPlayfield.length - 1);
         this.#undos.set(this.#editorPlayfield.id, undosForCurrentPlayfield);
     }

@@ -8,10 +8,14 @@ export class GameData {
     #currentlySelectedMap;
     #eventHandler;
     #playfieldHeight;
+    #nextId;
 
-    constructor(eventHandler, playfieldHeight) {
+    constructor(eventHandler, playfieldHeight, initialPalette = [], initialMap = []) {
         this.#eventHandler = eventHandler;
         this.#playfieldHeight = playfieldHeight;
+        this.#palette = initialPalette;
+        this.#map = initialMap;
+        this.#nextId = 0;
 
         this.addPlayfield(this.#playfieldHeight);
 
@@ -50,13 +54,41 @@ export class GameData {
         this.#eventHandler.addEventListener(COMMANDS.SELECT_MAP, (e) => {
             this.currentlySelectedMap = e.detail.idx;
         });
+
+        this.#eventHandler.addEventListener(COMMANDS.SET_STATE, (e) => {
+            this.#setState(e.detail.state);
+        });
+    }
+
+    #getState() {
+        return {
+            currentlySelectedMap: this.#currentlySelectedMap,
+            currentlySelected: this.#currentlySelected,
+            map: [...this.#map],
+            palette: this.#palette?.map((p) => p.getState()) ?? [],
+            playfieldHeight: this.#playfieldHeight,
+            nextId: this.#nextId,
+        };
+    }
+
+    #setState(state) {
+        this.#currentlySelectedMap = state.currentlySelectedMap;
+        this.#currentlySelected = state.currentlySelected;
+        // Deserialize these better... Also need to update nextId...
+        this.#map = [...state.#map];
+        this.#palette = state.#palette;
+        this.#playfieldHeight = state.playfieldHeight;
+        this.#nextId = state.nextId;
+
+        this.sendStateSet(state);
     }
 
     addPlayfield(height, id) {
-        const newPlayField = id === undefined ? new Playfield(height) : this.#getPlayField(id)?.copy();
+        const newId = ++this.#nextId;
+        const newPlayField = id === undefined ? new Playfield(newId, height) : this.#getPlayField(id)?.copy(newId);
         if (!newPlayField) return;
         this.#palette.push(newPlayField);
-        if (this.#currentlySelected === undefined) {
+        if (this.currentlySelected === undefined) {
             this.currentlySelected = newPlayField.id;
         }
         this.#eventHandler.sendPlayfieldAdded(newPlayField.id, this.#palette.length - 1);
@@ -70,8 +102,8 @@ export class GameData {
 
         this.#eventHandler.sendPlayFieldDeleted(id);
 
-        if (this.#currentlySelected === id) {
-            this.#currentlySelected = this.#palette[0].id;
+        if (this.currentlySelected === id) {
+            this.currentlySelected = this.#palette[0].id;
             this.#eventHandler.sendPlayFieldSelected(this.#currentlySelected);
         }
     }
@@ -136,7 +168,7 @@ export class GameData {
     }
 
     clonePlayfield(id = this.#currentlySelected) {
-        return this.#getPlayField(id)?.clone();
+        return this.#getPlayField(id)?.copy();
     }
 
     getPaletteData(id = this.#currentlySelected) {

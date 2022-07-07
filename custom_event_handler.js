@@ -20,8 +20,8 @@ export const EVENTS = {
     MAP_SELECTED: 'MAP_SELECTED',
     PLAYFIELD_ADDED: 'PLAYFIELD_ADDED',
     PLAYFIELD_DELETED: 'PLAYFIELD_DELETED',
-    PLAYFIELD_STATE_CHANGED: 'PLAYFIELD_STATE_CHANGED',
     PLAYFIELD_DATA_CHANGED: 'PLAYFIELD_DATA_CHANGED',
+    PLAYFIELD_STATE_CHANGED: 'PLAYFIELD_STATE_CHANGED',
     PLAYFIELD_SELECTED: 'PLAYFIELD_SELECTED',
     STATE_LOADED: 'STATE_LOADED',
     STATE_SAVED: 'STATE_SAVED',
@@ -45,56 +45,60 @@ export class CustomEventHandler {
         events.forEach((event) => this.#eventTarget.addEventListener(event, fn));
     }
 
+    #dispatchCustomEvent(event, detail) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(event, { detail }));
+    }
+
     // -----------------------------------------------------------------------
     // Helpers for commands
     // -----------------------------------------------------------------------
 
     sendAddPlayField(id) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_PLAYFIELD, { detail: { id } }));
+        this.#dispatchCustomEvent(COMMANDS.ADD_PLAYFIELD, { id });
     }
 
     sendAddToMap(id, idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.ADD_TO_MAP, { detail: { id, idx } }));
+        this.#dispatchCustomEvent(COMMANDS.ADD_TO_MAP, { id, idx });
     }
 
     sendChangePlayfieldData(id, data) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.CHANGE_PLAYFIELD_DATA, { detail: { id, data } }));
+        this.#dispatchCustomEvent(COMMANDS.CHANGE_PLAYFIELD_DATA, { id, data });
     }
 
     sendChangePlayfieldState(id, registerModes, playfieldMode) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.CHANGE_PLAYFIELD_STATE, { detail: { id, registerModes, playfieldMode } }));
+        this.#dispatchCustomEvent(COMMANDS.CHANGE_PLAYFIELD_STATE, { id, registerModes, playfieldMode });
     }
 
     sendDeletePlayField(id) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.DELETE_PLAYFIELD, { detail: { id } }));
+        this.#dispatchCustomEvent(COMMANDS.DELETE_PLAYFIELD, { id });
     }
 
     sendDeleteFromMap(idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.DELETE_FROM_MAP, { detail: { idx } }));
+        this.#dispatchCustomEvent(COMMANDS.DELETE_FROM_MAP, { idx });
     }
 
     sendLoadState(name) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.LOAD_STATE, { detail: { name } }));
+        this.#dispatchCustomEvent(COMMANDS.LOAD_STATE, { name });
     }
 
     sendMoveMap(fromIdx, toIdx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.MOVE_MAP, { detail: { fromIdx, toIdx } }));
+        this.#dispatchCustomEvent(COMMANDS.MOVE_MAP, { fromIdx, toIdx });
     }
 
     sendSaveState(name, state) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.SAVE_STATE, { detail: { name, state } }));
+        this.#dispatchCustomEvent(COMMANDS.SAVE_STATE, { name, state });
     }
 
     sendSetState(state) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.SET_STATE, { detail: { state } }));
+        this.#dispatchCustomEvent(COMMANDS.SET_STATE, { state });
     }
 
     sendSelectMap(idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.SELECT_MAP, { detail: { idx } }));
+        this.#dispatchCustomEvent(COMMANDS.SELECT_MAP, { idx });
     }
 
     sendSelectPlayField(id) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(COMMANDS.SELECT_PLAYFIELD, { detail: { id } }));
+        this.#dispatchCustomEvent(COMMANDS.SELECT_PLAYFIELD, { id });
     }
 
     // -----------------------------------------------------------------------
@@ -103,46 +107,50 @@ export class CustomEventHandler {
 
 
     sendMapAdded(id, idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_ADDED, { detail: { id, idx } }));
+        this.#dispatchCustomEvent(EVENTS.MAP_ADDED, { id, idx });
     }
 
     sendMapDeleted(idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_DELETED, { detail: { idx } }));
+        this.#dispatchCustomEvent(EVENTS.MAP_DELETED, { idx });
     }
 
     sendMapMoved(fromIdx, toIdx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_MOVED, { detail: { fromIdx, toIdx } }));
+        this.#dispatchCustomEvent(EVENTS.MAP_MOVED, { fromIdx, toIdx });
     }
 
     sendMapSelected(idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.MAP_SELECTED, { detail: { idx } }));
+        this.#dispatchCustomEvent(EVENTS.MAP_SELECTED, { idx });
     }
 
     sendPlayfieldAdded(id, idx) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_ADDED, { detail: { id, idx } }));
+        this.#dispatchCustomEvent(EVENTS.PLAYFIELD_ADDED, { id, idx });
+    }
+
+    sendPlayfieldDataChanged(id, data) {
+        this.#dispatchCustomEvent(EVENTS.PLAYFIELD_DATA_CHANGED, { id, data });
     }
 
     sendPlayfieldStateChanged(id, registerModes, playfieldMode) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_STATE_CHANGED, { detail: { id, registerModes, playfieldMode } }));
+        this.#dispatchCustomEvent(EVENTS.PLAYFIELD_STATE_CHANGED, { id, registerModes, playfieldMode });
     }
 
     sendPlayFieldDeleted(id) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_DELETED, { detail: { id } }));
+        this.#dispatchCustomEvent(EVENTS.PLAYFIELD_DELETED, { id });
     }
 
     sendPlayFieldSelected(id) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.PLAYFIELD_SELECTED, { detail: { id } }));
+        this.#dispatchCustomEvent(EVENTS.PLAYFIELD_SELECTED, { id });
     }
 
     sendStateLoaded(name, state) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.STATE_LOADED, { detail: { name, state } }));
+        this.#dispatchCustomEvent(EVENTS.STATE_LOADED, { name, state });
     }
 
     sendStateSaved(name, state) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.STATE_SAVED, { detail: { name, state } }));
+        this.#dispatchCustomEvent(EVENTS.STATE_SAVED, { name, state });
     }
 
     sendStateSet(state) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(EVENTS.STATE_SET, { detail: { state } }));
+        this.#dispatchCustomEvent(EVENTS.STATE_SET, { state } );
     }
 }
