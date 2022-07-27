@@ -14,7 +14,6 @@ export class Map {
 
         this.#gameData = gameData;
         this.#eventHandler = eventHandler;
-
         this.#redrawWholeMap();
 
         this.#mapPlayfieldsArea.addEventListener('click', (e) => {
@@ -71,6 +70,11 @@ export class Map {
         this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_DELETED, (e) => {
             this.#deleteMapsWithPlayfieldId(e.detail.id);
         });
+
+        this.#eventHandler.addEventListener(EVENTS.STATE_SET, (e) => {
+            this.#redrawWholeMap();
+            this.#selectMap(e.detail.state.currentlySelectedMap);
+        });
     }
 
     #redrawGameData(id) {
@@ -115,9 +119,10 @@ export class Map {
 
     #redrawWholeMap() {
         const mapEntries = this.#gameData.getMapLength();
-        const currentNumberOfCanvases = this.#getCanvases().length;
+        let currentNumberOfCanvases = this.#getCanvases().length;
+        const leastCommon = Math.min(mapEntries, currentNumberOfCanvases);
 
-        for (let canvasIdx = 0; canvasIdx < mapEntries; ++canvasIdx) {
+        for (let canvasIdx = 0; canvasIdx < leastCommon; ++canvasIdx) {
             this.#redrawMapIdx(canvasIdx);
         }
 
@@ -126,6 +131,10 @@ export class Map {
                 this.#appendNewCanvas(this.#gameData.getPlayfieldIdAtMapIdx(childIdx));
                 this.#redrawMapIdx(childIdx);
             }
+        }
+
+        while (mapEntries < currentNumberOfCanvases) {
+            this.#deleteMap(--currentNumberOfCanvases);
         }
     }
 

@@ -220,6 +220,12 @@ export class Editor {
             this.#setSelectedPlayfield(e.detail.id);
         });
 
+        this.#eventHandler.addEventListener(EVENTS.STATE_SET, (e) => {
+            if (e.detail.state.currentlySelected) {
+                this.#setSelectedPlayfield(e.detail.state.currentlySelected);
+            }
+        });
+
         document.getElementById('playfieldNormalMode').addEventListener('click', () => this.setEditorMode(PlayfieldMode.NORMAL));
         document.getElementById('playfieldMirrorMode').addEventListener('click', () => this.setEditorMode(PlayfieldMode.REFLECTED));
         document.getElementById('playfieldUndo').addEventListener('click', () => this.undo());

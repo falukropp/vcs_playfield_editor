@@ -74,13 +74,12 @@ export class GameData {
     #setState(state) {
         this.#currentlySelectedMap = state.currentlySelectedMap;
         this.#currentlySelected = state.currentlySelected;
-        // Deserialize these better... Also need to update nextId...
-        this.#map = [...state.#map];
-        this.#palette = state.#palette;
+        this.#map = state.map ? [...state.map]: [];
+        this.#palette = state.palette?.map((p) => new Playfield(p.id, p.height, p.mode, p.data, p.registerModes)) ?? [],
         this.#playfieldHeight = state.playfieldHeight;
         this.#nextId = state.nextId;
 
-        this.sendStateSet(state);
+        this.#eventHandler.sendStateSet(state);
     }
 
     addPlayfield(height, id) {

@@ -15,9 +15,13 @@ export class StorageHandler {
             const stateKey = this.#getStateKey(stateName);
             const state = localStorage.getItem(stateKey);
 
-            this.#eventHandler.sendStateLoaded(stateName, state);
+            if (state) {
+                this.#eventHandler.sendStateLoaded(stateName, state);
+                this.#eventHandler.sendSetState(state);
+            } else {
+                console.log(`state : ${stateName} not found`)
+            }
 
-            this.#eventHandler.sendSetState(state);
         });
 
         this.#eventHandler.addEventListener(COMMANDS.SAVE_STATE, (e) => {

@@ -13,5 +13,5 @@ python -m http.server --bind 0.0.0.0 9999
 
 --------
 
-1. Load state (name) command(?) -> state loaded -> set state(state) command -> map/playfield set events
-2. save state (name, state) command -> state saved (
+1. Load state (name) command(?) -> state loaded -> set state(state) command -> state set events
+2. save state (name, state) command -> state saved event

@@ -35,6 +35,16 @@ export class Playfield {
         return new Playfield(id ?? this.#id, this.#height, this.#mode, this.#data, this.getRegisterModes());
     }
 
+    getState() {
+        return {
+            id: this.id,
+            data: this.data,
+            mode: this.mode,
+            height: this.height,
+            registerModes: this.registerModes
+        }
+    }
+
     get id() {
         return this.#id
     }

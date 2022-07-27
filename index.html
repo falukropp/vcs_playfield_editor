@@ -29,6 +29,8 @@
                 new Editor(document, customEventHandler, gameData);
                 new VCSData(document, gameData);
                 new Map(document, customEventHandler, gameData);
+
+                customEventHandler.sendLoadState('autosave');
             });
         </script>
     </head>

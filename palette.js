@@ -83,7 +83,12 @@ export class Palette {
         const numberOfPaletteEntries = paletteEntries.length;
 
         const canvases = this.#palettePlayfieldsArea.getElementsByTagName('canvas');
-        const currentNumberOfCanvases = canvases.length;
+        let currentNumberOfCanvases = canvases.length;
+        const leastCommon = Math.min(numberOfPaletteEntries, currentNumberOfCanvases);
+
+        for (let canvasIdx = 0; canvasIdx < leastCommon; ++canvasIdx) {
+            this.#updateCanvas(paletteEntries[canvasIdx], canvases[canvasIdx]);
+        }
 
         if (numberOfPaletteEntries > currentNumberOfCanvases) {
             for (let childIdx = currentNumberOfCanvases; childIdx < numberOfPaletteEntries; ++childIdx) {
@@ -92,8 +97,9 @@ export class Palette {
             }
         }
 
-        for (let canvasIdx = 0; canvasIdx < numberOfPaletteEntries; ++canvasIdx) {
-            this.#updateCanvas(paletteEntries[canvasIdx], canvases[canvasIdx]);
+        while (numberOfPaletteEntries < currentNumberOfCanvases) {
+            const playFieldId = this.#gameData.getPlayfieldIdAtIdx(--currentNumberOfCanvases);
+            this.#deletePlayfield(playFieldId);
         }
     }
 
