@@ -13,24 +13,26 @@ export class StorageHandler {
         this.#eventHandler.addEventListener(COMMANDS.LOAD_STATE, (e) => {
             const stateName = e.detail.name;
             const stateKey = this.#getStateKey(stateName);
-            const state = localStorage.getItem(stateKey);
+            const stateRaw = localStorage.getItem(stateKey);
 
-            if (state) {
+            if (stateRaw) {                
+                const state = JSON.parse(stateRaw);
                 this.#eventHandler.sendStateLoaded(stateName, state);
                 this.#eventHandler.sendSetState(state);
             } else {
-                console.log(`state : ${stateName} not found`)
+                console.log(`state : ${stateName} not found`);
             }
-
         });
 
         this.#eventHandler.addEventListener(COMMANDS.SAVE_STATE, (e) => {
             const stateName = e.detail.name;
             const stateKey = this.#getStateKey(stateName);
             const state = e.detail.state;
-            localStorage.setItem(stateKey, state);
 
-            this.#eventHandler.sendStateSaved(stateName, state);
+            if (state) {
+                localStorage.setItem(stateKey, JSON.stringify(state));
+                this.#eventHandler.sendStateSaved(stateName, state);
+            }
         });
     }
 }

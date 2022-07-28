@@ -24,7 +24,23 @@
             const storage = new StorageHandler(customEventHandler);
             const gameData = new GameData(customEventHandler, vcsPlayfieldRows);
 
-            document.addEventListener('DOMContentLoaded', function () {
+            // Bleh. Add some sort of dirty-checking instead?
+            customEventHandler.addEventsListener(
+                [
+                    EVENTS.MAP_ADDED,
+                    EVENTS.MAP_DELETED,
+                    EVENTS.MAP_MOVED,
+                    EVENTS.MAP_SELECTED,
+                    EVENTS.PLAYFIELD_ADDED,
+                    EVENTS.PLAYFIELD_DELETED,
+                    EVENTS.PLAYFIELD_DATA_CHANGED,
+                    EVENTS.PLAYFIELD_STATE_CHANGED,
+                    EVENTS.PLAYFIELD_SELECTED,
+                ],
+                (e) => customEventHandler.sendSaveState('autosave', gameData.getState())
+            );
+
+            document.addEventListener('DOMContentLoaded', () => {
                 new Palette(document, customEventHandler, gameData);
                 new Editor(document, customEventHandler, gameData);
                 new VCSData(document, gameData);

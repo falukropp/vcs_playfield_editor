@@ -60,7 +60,7 @@ export class GameData {
         });
     }
 
-    #getState() {
+    getState() {
         return {
             currentlySelectedMap: this.#currentlySelectedMap,
             currentlySelected: this.#currentlySelected,

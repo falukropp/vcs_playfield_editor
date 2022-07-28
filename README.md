@@ -1,17 +1,22 @@
-python -m http.server --bind 0.0.0.0 9999
+# What is this
 
-# TODO:
+Just a simple editor custom-made for a stupid-ass VCS game I done did.
+
+# Things TODO... maybe:
 - Editor
     - Copy/paste
 - Map - editor
-    - Edit level
     - Create / select separate levels
 - Data
-    - Local storage
-        - Load/save autosave
     - Export / Import
 
---------
+# Running
+Well, it's just a simple HTMLpage, run directly in a favorite IDE or something like this:
+```
+python -m http.server <someport>
+```
+# Screenshot
 
-1. Load state (name) command(?) -> state loaded -> set state(state) command -> state set events
-2. save state (name, state) command -> state saved event
+![Behold](screenshot.png?raw=true "Editor IN ACTION")
+
+

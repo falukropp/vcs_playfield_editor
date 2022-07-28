@@ -52,6 +52,12 @@ export class Palette {
         this.#eventHandler.addEventListener(EVENTS.PLAYFIELD_ADDED, (e) => {
             this.#addNewPlayField(e.detail.id);
         });
+
+        this.#eventHandler.addEventListener(EVENTS.STATE_SET, (e) => {
+            this.redrawAllGameData();
+            this.#setSelectedCanvas(e.detail.state.currentlySelected);
+        });
+
     }
 
     #setSelectedCanvas(id) {
